@@ -10,14 +10,14 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDecideApplication, useDisburse } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Money } from '@/components/Money';
 import { StatusBadge } from '@/components/StatusBadge';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
 import type { ApplicationDTO } from '@lms/shared';
-import { ArrowLeft, CircleAlert, Loader2, Sparkles } from 'lucide-react';
+import { ArrowLeft, CircleAlert, Loader2, Sparkles, ShieldCheck, Check, X, ArrowRight } from 'lucide-react';
+import { formatDate } from '@/lib/format';
 
 export function AdminApplicationDetail() {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +26,7 @@ export function AdminApplicationDetail() {
     queryFn: () => apiFetch<{ application: ApplicationDTO }>(`/api/applications/${id}`),
     enabled: !!id,
   });
+
   const decide = useDecideApplication();
   const disburse = useDisburse();
   const nav = useNavigate();
@@ -33,24 +34,22 @@ export function AdminApplicationDetail() {
 
   if (q.isLoading) {
     return (
-      <main className="min-h-screen bg-background">
-        <div className="mx-auto flex max-w-3xl items-center justify-center px-6 py-20 text-sm text-muted-foreground">
-          <Loader2 className="mr-2 size-4 animate-spin" /> Loading application
-        </div>
+      <main className="min-h-screen bg-[#FAF7F0] text-[#2C40A7] p-6 flex flex-col items-center justify-center">
+        <Loader2 className="size-8 animate-spin text-[#F237A1] mb-2" />
+        <span className="font-mono text-xs font-bold uppercase tracking-wider">Loading Application...</span>
       </main>
     );
   }
 
   if (q.error || !q.data) {
     return (
-      <main className="min-h-screen bg-background">
-        <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 px-6 py-20 text-center">
-          <span className="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-            <CircleAlert className="size-5" />
-          </span>
-          <p className="text-sm text-destructive">Could not load application.</p>
-          <Button variant="outline" size="sm" render={<Link to="/admin" />}>
-            <ArrowLeft /> Back to queue
+      <main className="min-h-screen bg-[#FAF7F0] text-[#2C40A7] p-6 flex flex-col items-center justify-center">
+        <div className="max-w-md w-full rounded-2xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-8 shadow-[5px_5px_0px_#2C40A7] text-center space-y-4">
+          <CircleAlert className="size-12 text-[#DC2626] mx-auto" />
+          <h1 className="text-2xl font-extrabold">Application Not Found</h1>
+          <Button render={<Link to="/admin" />}>
+            <ArrowLeft className="size-4" />
+            Back to Queue
           </Button>
         </div>
       </main>
@@ -61,142 +60,194 @@ export function AdminApplicationDetail() {
   const ruleRec = a.recommendation;
 
   return (
-    <main className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-          <Button variant="ghost" size="sm" render={<Link to="/admin" />}>
-            <ArrowLeft />
-            Queue
-          </Button>
-          <StatusBadge status={a.status} />
+    <main className="min-h-screen bg-[#FAF7F0] text-[#2C40A7] font-sans selection:bg-[#F237A1] selection:text-white pb-20">
+      
+      {/* Top Header */}
+      <header className="border-b-2 border-[#2C40A7] bg-[#FAF7F0] sticky top-0 z-40">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
+          <Link to="/admin" className="flex items-center gap-2 text-sm font-bold hover:text-[#F237A1] transition-colors">
+            <ArrowLeft className="size-4 stroke-[2.5]" />
+            Back to Underwriting Queue
+          </Link>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-mono font-bold text-[#2C40A7]/70">APP #{a.id.slice(0, 8)}</span>
+            <StatusBadge status={a.status} />
+          </div>
         </div>
       </header>
 
-      <div className="mx-auto max-w-3xl space-y-4 px-6 py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Application</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
-              <Row label="Amount" value={<Money cents={a.amount} />} />
-              <Row label="Term" value={`${a.termMonths} months`} />
-              <Row label="Rate" value={`${(a.annualRateBps / 100).toFixed(2)}%`} />
-              <Row label="Employment" value={a.employment === 'salaried' ? 'Salaried' : 'Self-employed'} />
-              <div className="sm:col-span-2"><Row label="Purpose" value={a.purpose} /></div>
-              <Row label="Submitted" value={new Date(a.createdAt).toLocaleString('en-IN')} />
-              {a.decisionReason ? <div className="sm:col-span-2"><Row label="Decision reason" value={a.decisionReason} /></div> : null}
-            </dl>
-          </CardContent>
-        </Card>
+      {/* Main Content */}
+      <div className="mx-auto max-w-4xl px-6 pt-8 space-y-6">
+        
+        {/* Application Card */}
+        <div className="rounded-2xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-8 shadow-[5px_5px_0px_#2C40A7] space-y-6">
+          <div className="flex items-center justify-between border-b-2 border-[#2C40A7]/20 pb-4">
+            <div>
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#2C40A7]/70 block">
+                APPLICATION DETAILS
+              </span>
+              <h1 className="text-3xl font-extrabold font-mono text-[#2C40A7] mt-0.5">
+                <Money cents={a.amount} />
+              </h1>
+            </div>
+            <StatusBadge status={a.status} />
+          </div>
 
-        {a.status === 'pending' && ruleRec && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Sparkles className="size-4 text-muted-foreground" /> Rule recommendation
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">
-                Recommendation: <strong className="capitalize">{ruleRec.rule}</strong>
-                {ruleRec.reason ? <> — {ruleRec.reason}</> : null}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">Admin can override.</p>
-            </CardContent>
-          </Card>
-        )}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 font-mono text-xs font-bold bg-[#FAF7F0] p-4 rounded-xl border-2 border-[#2C40A7]">
+            <div>
+              <span className="text-[#2C40A7]/60 block text-[10px]">TENURE</span>
+              <span className="text-sm">{a.termMonths} Months</span>
+            </div>
+            <div>
+              <span className="text-[#2C40A7]/60 block text-[10px]">RATE</span>
+              <span className="text-sm">{(a.annualRateBps / 100).toFixed(2)}% APR</span>
+            </div>
+            <div>
+              <span className="text-[#2C40A7]/60 block text-[10px]">EMPLOYMENT</span>
+              <span className="text-sm capitalize">{a.employment}</span>
+            </div>
+            <div>
+              <span className="text-[#2C40A7]/60 block text-[10px]">SUBMITTED</span>
+              <span className="text-sm">{formatDate(a.createdAt)}</span>
+            </div>
+          </div>
 
-        {a.status === 'pending' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Decision</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Input
-                placeholder="Reason (optional for approve, required for reject)"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-              />
-              <div className="flex gap-2">
-                <Button
-                  onClick={() =>
-                    decide.mutate(
-                      { id: a.id, input: { decision: 'approve', reason: reason || 'Approved' } },
-                      {
-                        onSuccess: () => {
-                          q.refetch();
-                          setReason('');
-                          toast.success('Approved');
-                        },
-                        onError: (e) => toast.error((e as Error).message),
-                      }
-                    )
-                  }
-                  disabled={decide.isPending}
-                >
-                  {decide.isPending ? <Loader2 className="animate-spin" /> : null}
-                  Approve
-                </Button>
-                <Button
-                  variant="destructive"
-                  disabled={!reason || decide.isPending}
-                  onClick={() =>
-                    decide.mutate(
-                      { id: a.id, input: { decision: 'reject', reason } },
-                      {
-                        onSuccess: () => {
-                          q.refetch();
-                          setReason('');
-                          toast.success('Rejected');
-                        },
-                        onError: (e) => toast.error((e as Error).message),
-                      }
-                    )
-                  }
-                >
-                  {decide.isPending ? <Loader2 className="animate-spin" /> : null}
-                  Reject
-                </Button>
+          <div className="space-y-1 font-mono text-xs font-bold">
+            <span className="text-[#2C40A7]/70 block text-[10px] uppercase">PURPOSE</span>
+            <div className="bg-[#FFFDF8] p-3 rounded-lg border border-[#2C40A7] text-sm font-sans font-medium text-[#2C40A7]">
+              {a.purpose}
+            </div>
+          </div>
+
+          {a.decisionReason && (
+            <div className="space-y-1 font-mono text-xs font-bold">
+              <span className="text-[#F237A1] block text-[10px] uppercase">DECISION REASON</span>
+              <div className="bg-[#FDE8F3] p-3 rounded-lg border-2 border-[#2C40A7] text-sm text-[#2C40A7]">
+                {a.decisionReason}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          )}
+        </div>
+
+        {/* Rule Recommendation Banner */}
+        {a.status === 'pending' && ruleRec && (
+          <div className="rounded-2xl border-2 border-[#2C40A7] bg-[#FDE8F3] p-6 shadow-[4px_4px_0px_#2C40A7] flex items-start gap-4">
+            <div className="size-10 rounded-xl bg-[#F237A1] text-white border-2 border-[#2C40A7] shadow-[2px_2px_0px_#2C40A7] flex items-center justify-center shrink-0">
+              <Sparkles className="size-5" />
+            </div>
+            <div className="space-y-1">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#F237A1]">
+                AUTOMATED UNDERWRITING RULE RECOMMENDATION
+              </span>
+              <div className="text-lg font-extrabold text-[#2C40A7] capitalize">
+                Rule Suggests: {ruleRec.rule}
+              </div>
+              {ruleRec.reason && (
+                <p className="text-xs font-mono font-bold text-[#2C40A7]/80">
+                  Reason: {ruleRec.reason}
+                </p>
+              )}
+              <p className="text-[11px] font-mono text-[#2C40A7]/60 pt-1">
+                The underwriting engine is advisory — as an admin, you can approve or override.
+              </p>
+            </div>
+          </div>
         )}
 
-        {a.status === 'approved' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Disburse</CardTitle>
-            </CardHeader>
-            <CardContent>
+        {/* Admin Decision Actions */}
+        {a.status === 'pending' && (
+          <div className="rounded-2xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-6 shadow-[5px_5px_0px_#2C40A7] space-y-4">
+            <h3 className="font-extrabold text-lg text-[#2C40A7]">Underwriter Action</h3>
+            <Input
+              placeholder="Reason / Admin Note (Optional for Approve, Required for Reject)"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+            />
+            <div className="flex gap-3">
               <Button
+                disabled={decide.isPending}
                 onClick={() =>
-                  disburse.mutate(a.id, {
-                    onSuccess: () => {
-                      toast.success('Disbursed');
-                      nav('/admin');
-                    },
-                    onError: (e) => toast.error((e as Error).message),
-                  })
+                  decide.mutate(
+                    { id: a.id, input: { decision: 'approve', reason: reason || 'Approved by underwriter' } },
+                    {
+                      onSuccess: () => {
+                        q.refetch();
+                        toast.success('Application Approved');
+                      },
+                      onError: (e) => toast.error((e as Error).message),
+                    }
+                  )
                 }
-                disabled={disburse.isPending}
               >
-                {disburse.isPending ? <Loader2 className="animate-spin" /> : null}
-                Disburse loan
+
+                {decide.isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4 stroke-[3]" />}
+                Approve Application
               </Button>
-            </CardContent>
-          </Card>
+              <Button
+                variant="destructive"
+                disabled={decide.isPending || !reason.trim()}
+                onClick={() =>
+                  decide.mutate(
+                    { id: a.id, input: { decision: 'reject', reason } },
+                    {
+                      onSuccess: () => {
+                        q.refetch();
+                        toast.success('Application Rejected');
+                      },
+                      onError: (e) => toast.error((e as Error).message),
+                    }
+                  )
+                }
+              >
+                {decide.isPending ? <Loader2 className="size-4 animate-spin" /> : <X className="size-4 stroke-[3]" />}
+                Reject Application
+              </Button>
+            </div>
+          </div>
         )}
+
+        {/* Disburse Button for Approved Applications */}
+        {a.status === 'approved' && (
+          <div className="rounded-2xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-6 shadow-[5px_5px_0px_#2C40A7] space-y-4">
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="size-6 text-[#F237A1]" />
+              <div>
+                <h3 className="font-extrabold text-lg text-[#2C40A7]">Ready for Disbursement</h3>
+                <p className="text-xs font-medium text-[#2C40A7]/80">
+                  Disbursing generates the 12-month amortization schedule and creates the active loan.
+                </p>
+              </div>
+            </div>
+            <Button
+              size="lg"
+              className="w-full sm:w-auto"
+              disabled={disburse.isPending}
+              onClick={() =>
+                disburse.mutate(a.id, {
+                  onSuccess: (data) => {
+                    toast.success('Loan Disbursed Successfully!');
+                    nav(`/loans/${data.loan.id}`);
+                  },
+                  onError: (e) => toast.error((e as Error).message),
+                })
+              }
+            >
+              {disburse.isPending ? (
+                <>
+                  <Loader2 className="size-5 animate-spin" />
+                  Generating Schedule...
+                </>
+              ) : (
+                <>
+                  Disburse Loan & Generate Amortization Schedule
+                  <ArrowRight className="size-5" />
+                </>
+              )}
+            </Button>
+          </div>
+        )}
+
       </div>
     </main>
-  );
-}
-
-function Row({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <>
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-medium">{value}</dd>
-    </>
   );
 }

@@ -12,7 +12,7 @@ import type { ApplicationDTO, DecisionInput, LoanDTO, InstallmentDTO } from '@lm
 export function useAdminApplications(status: 'pending' | 'approved' | 'rejected' | 'disbursed' = 'pending') {
   return useQuery({
     queryKey: ['admin', 'applications', status],
-    queryFn: () => apiFetch<{ applications: (ApplicationDTO & { applicant: { id: string; email: string; fullName: string } })[] }>(`/api/admin/applications?status=${status}`),
+    queryFn: () => apiFetch<{ applications: (ApplicationDTO & { applicant: { id: string; email: string; fullName: string; monthlyIncome?: number } })[] }>(`/api/admin/applications?status=${status}`),
   });
 }
 

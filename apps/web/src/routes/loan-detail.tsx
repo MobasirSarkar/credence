@@ -8,13 +8,12 @@
 import { Link, useParams } from 'react-router-dom';
 import { useLoan, usePayInstallment } from '@/hooks/useLoans';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Money } from '@/components/Money';
 import { formatDate } from '@/lib/format';
 import { toast } from 'sonner';
 import { StatusBadge } from '@/components/StatusBadge';
-import { ArrowLeft, CircleAlert, Loader2, Receipt, TrendingUp, Wallet, Check } from 'lucide-react';
+import { ArrowLeft, CircleAlert, Loader2, Receipt, TrendingUp, Wallet, Check, Calendar, ShieldCheck } from 'lucide-react';
 
 export function LoanDetail() {
   const { id } = useParams<{ id: string }>();
@@ -23,24 +22,23 @@ export function LoanDetail() {
 
   if (q.isLoading) {
     return (
-      <main className="min-h-screen bg-background">
-        <div className="mx-auto flex max-w-4xl items-center justify-center px-6 py-20 text-sm text-muted-foreground">
-          <Loader2 className="mr-2 size-4 animate-spin" /> Loading loan
-        </div>
+      <main className="min-h-screen bg-[#FAF7F0] text-[#2C40A7] p-6 flex flex-col items-center justify-center">
+        <Loader2 className="size-8 animate-spin text-[#F237A1] mb-2" />
+        <span className="font-mono text-xs font-bold uppercase tracking-wider">Loading Loan Lifecycle...</span>
       </main>
     );
   }
 
   if (q.error || !q.data) {
     return (
-      <main className="min-h-screen bg-background">
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-3 px-6 py-20 text-center">
-          <span className="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-            <CircleAlert className="size-5" />
-          </span>
-          <p className="text-sm text-destructive">Could not load loan.</p>
-          <Button variant="outline" size="sm" render={<Link to="/dashboard" />}>
-            <ArrowLeft /> Back to dashboard
+      <main className="min-h-screen bg-[#FAF7F0] text-[#2C40A7] p-6 flex flex-col items-center justify-center">
+        <div className="max-w-md w-full rounded-2xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-8 shadow-[5px_5px_0px_#2C40A7] text-center space-y-4">
+          <CircleAlert className="size-12 text-[#DC2626] mx-auto" />
+          <h1 className="text-2xl font-extrabold">Loan Not Found</h1>
+          <p className="text-sm text-[#2C40A7]/80 font-medium">The requested loan details could not be loaded.</p>
+          <Button render={<Link to="/dashboard" />}>
+            <ArrowLeft className="size-4" />
+            Back to Dashboard
           </Button>
         </div>
       </main>
@@ -49,150 +47,197 @@ export function LoanDetail() {
 
   const { loan, installments } = q.data;
   const next = installments.find((i) => !i.paidAt);
-  const paid = installments.filter((i) => i.paidAt).length;
-  const total = installments.length;
-  const progress = total > 0 ? (paid / total) * 100 : 0;
-  const paidSoFar = loan.principal - loan.outstanding;
+  const paidCount = installments.filter((i) => i.paidAt).length;
+  const totalCount = installments.length;
+  const percentPaid = totalCount > 0 ? Math.round((paidCount / totalCount) * 100) : 0;
 
   return (
-    <main className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
-          <Button variant="ghost" size="sm" render={<Link to="/dashboard" />}>
-            <ArrowLeft />
-            Dashboard
-          </Button>
-          <StatusBadge status={loan.status} />
+    <main className="min-h-screen bg-[#FAF7F0] text-[#2C40A7] font-sans selection:bg-[#F237A1] selection:text-white pb-20">
+      
+      {/* Top Header */}
+      <header className="border-b-2 border-[#2C40A7] bg-[#FAF7F0] sticky top-0 z-40">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <Link to="/dashboard" className="flex items-center gap-2 text-sm font-bold hover:text-[#F237A1] transition-colors">
+            <ArrowLeft className="size-4 stroke-[2.5]" />
+            Back to Dashboard
+          </Link>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-mono font-bold text-[#2C40A7]/70">LOAN #{loan.id.slice(0, 8)}</span>
+            <StatusBadge status={loan.status} />
+          </div>
         </div>
       </header>
 
-      <div className="mx-auto max-w-4xl space-y-6 px-6 py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-xl">
-              <Receipt className="size-4 text-muted-foreground" />
-              Loan summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <Summary label="Principal" value={<Money cents={loan.principal} />} icon={Wallet} />
-              <Summary label="Outstanding" value={<Money cents={loan.outstanding} />} icon={TrendingUp} />
-              <Summary label="Paid so far" value={<Money cents={paidSoFar} />} icon={Check} />
-              <Summary label="Monthly EMI" value={<Money cents={Math.round((loan.principal / Math.max(1, loan.termMonths)))} />} icon={Receipt} />
-            </div>
-            <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
-              <div className="flex justify-between sm:block">
-                <dt className="text-muted-foreground">Rate</dt>
-                <dd className="font-medium tabular-nums">{(loan.annualRateBps / 100).toFixed(2)}% APR</dd>
-              </div>
-              <div className="flex justify-between sm:block">
-                <dt className="text-muted-foreground">Term</dt>
-                <dd className="font-medium tabular-nums">{loan.termMonths} months</dd>
-              </div>
-              <div className="flex justify-between sm:block">
-                <dt className="text-muted-foreground">Start</dt>
-                <dd className="font-medium">{formatDate(loan.startDate)}</dd>
-              </div>
-              <div className="flex justify-between sm:block">
-                <dt className="text-muted-foreground">End</dt>
-                <dd className="font-medium">{formatDate(loan.endDate)}</dd>
-              </div>
-            </dl>
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>Repayment progress</span>
-                <span className="tabular-nums">{paid} of {total} installments</span>
-              </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress.toFixed(1)}%` }} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Main Content */}
+      <div className="mx-auto max-w-6xl px-6 pt-8 space-y-8">
+        
+        {/* Loan Title & Stats Summary */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-[#2C40A7]/20 pb-6">
+          <div>
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#2C40A7]/70">
+              REPAYMENT LIFECYCLE
+            </span>
+            <h1 className="text-3xl font-extrabold text-[#2C40A7] flex items-center gap-3 mt-1">
+              Personal Loan — <Money cents={loan.principal} />
+            </h1>
+          </div>
+          {next && loan.status === 'active' && (
+            <Button
+              size="lg"
+              disabled={pay.isPending}
+              onClick={() =>
+                pay.mutate(next.sequence, {
+                  onSuccess: () => toast.success(`EMI #${next.sequence} Paid Successfully`),
+                  onError: (e) => toast.error((e as Error).message),
+                })
+              }
+            >
+              {pay.isPending ? (
+                <>
+                  <Loader2 className="size-5 animate-spin" />
+                  Processing Payment...
+                </>
+              ) : (
+                <>
+                  Pay Next EMI (<Money cents={next.principalDue + next.interestDue} />)
+                  <ArrowLeft className="size-4 rotate-180" />
+                </>
+              )}
+            </Button>
+          )}
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Installments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {installments.length === 0 ? (
-              <p className="py-6 text-center text-sm text-muted-foreground">No installments scheduled.</p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">#</TableHead>
-                    <TableHead>Due</TableHead>
-                    <TableHead>Principal</TableHead>
-                    <TableHead>Interest</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right"></TableHead>
+        {/* 4 Summary Stat Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          
+          <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-5 shadow-[4px_4px_0px_#2C40A7]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2C40A7]/70 block mb-1">
+              PRINCIPAL BORROWED
+            </span>
+            <div className="text-2xl font-extrabold font-mono text-[#2C40A7]">
+              <Money cents={loan.principal} />
+            </div>
+            <span className="text-xs font-bold text-[#2C40A7]/70 mt-2 block">
+              {loan.termMonths} Months @ {(loan.annualRateBps / 100).toFixed(2)}% APR
+            </span>
+          </div>
+
+          <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-5 shadow-[4px_4px_0px_#2C40A7]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2C40A7]/70 block mb-1">
+              OUTSTANDING PRINCIPAL
+            </span>
+            <div className="text-2xl font-extrabold font-mono text-[#F237A1]">
+              <Money cents={loan.outstanding} />
+            </div>
+            <span className="text-xs font-bold text-[#2C40A7]/70 mt-2 block">
+              Remaining balance
+            </span>
+          </div>
+
+          <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-5 shadow-[4px_4px_0px_#2C40A7]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2C40A7]/70 block mb-1">
+              INSTALLMENTS PROGRESS
+            </span>
+            <div className="text-2xl font-extrabold font-mono text-[#2C40A7]">
+              {paidCount} / {totalCount}
+            </div>
+            <div className="mt-2 h-2 w-full bg-[#FDE8F3] rounded-full overflow-hidden border border-[#2C40A7]">
+              <div className="h-full bg-[#F237A1] rounded-full" style={{ width: `${percentPaid}%` }} />
+            </div>
+          </div>
+
+          <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-5 shadow-[4px_4px_0px_#2C40A7]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2C40A7]/70 block mb-1">
+              SCHEDULE DATES
+            </span>
+            <div className="text-xs font-mono font-bold text-[#2C40A7] space-y-1">
+              <div>Start: {formatDate(loan.startDate)}</div>
+              <div>End: {formatDate(loan.endDate)}</div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Installment Schedule Table */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Receipt className="size-5 text-[#F237A1]" />
+              <h2 className="text-xl font-extrabold text-[#2C40A7]">Amortization Schedule</h2>
+            </div>
+            <span className="text-xs font-mono font-bold text-[#2C40A7]/70">
+              Reducing Balance Calculations
+            </span>
+          </div>
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">#</TableHead>
+                <TableHead>Due Date</TableHead>
+                <TableHead>Principal</TableHead>
+                <TableHead>Interest</TableHead>
+                <TableHead>Total EMI</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {installments.map((inst) => {
+                const totalDue = inst.principalDue + inst.interestDue;
+                const isNext = next?.id === inst.id;
+                const isPaid = !!inst.paidAt;
+
+                return (
+                  <TableRow
+                    key={inst.id}
+                    className={isNext ? 'bg-[#FDE8F3]/60 border-l-4 border-l-[#F237A1]' : ''}
+                  >
+                    <TableCell className="font-mono font-bold">{inst.sequence}</TableCell>
+                    <TableCell className="font-mono font-bold">{formatDate(inst.dueDate)}</TableCell>
+                    <TableCell><Money cents={inst.principalDue} /></TableCell>
+                    <TableCell><Money cents={inst.interestDue} /></TableCell>
+                    <TableCell className="font-bold text-[#2C40A7]"><Money cents={totalDue} /></TableCell>
+                    <TableCell>
+                      {isPaid ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-[#FDE8F3] text-[#2C40A7] border border-[#2C40A7]">
+                          <Check className="size-3 text-[#F237A1] stroke-[3]" />
+                          Paid {formatDate(inst.paidAt!)}
+                        </span>
+                      ) : isNext ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-[#F237A1] text-white border border-[#2C40A7]">
+                          Next Due
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-[#FFFDF8] text-[#2C40A7]/70 border border-[#2C40A7]/40">
+                          Upcoming
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {isNext && loan.status === 'active' && (
+                        <Button
+                          size="xs"
+                          disabled={pay.isPending}
+                          onClick={() =>
+                            pay.mutate(inst.sequence, {
+                              onSuccess: () => toast.success(`EMI #${inst.sequence} Paid`),
+                              onError: (e) => toast.error((e as Error).message),
+                            })
+                          }
+                        >
+                          {pay.isPending ? <Loader2 className="size-3 animate-spin" /> : 'Pay EMI'}
+                        </Button>
+                      )}
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {installments.map((i) => {
-                    const isNext = next?.id === i.id && loan.status === 'active';
-                    return (
-                      <TableRow key={i.id} className={isNext ? 'bg-muted/50' : undefined}>
-                        <TableCell className="tabular-nums">{i.sequence}</TableCell>
-                        <TableCell>{formatDate(i.dueDate)}</TableCell>
-                        <TableCell><Money cents={i.principalDue} /></TableCell>
-                        <TableCell><Money cents={i.interestDue} /></TableCell>
-                        <TableCell>
-                          {i.paidAt ? (
-                            <span className="inline-flex items-center gap-1.5 text-green-700 dark:text-green-400">
-                              <Check className="size-3.5" /> Paid {formatDate(i.paidAt)}
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground">Due</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {isNext && (
-                            <Button
-                              size="sm"
-                              disabled={pay.isPending}
-                              onClick={() =>
-                                pay.mutate(i.sequence, {
-                                  onError: (e) => toast.error((e as Error).message),
-                                  onSuccess: () => toast.success('EMI paid'),
-                                })
-                              }
-                            >
-                              {pay.isPending ? <Loader2 className="animate-spin" /> : null}
-                              Pay EMI
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+
       </div>
     </main>
-  );
-}
-
-function Summary({
-  label,
-  value,
-  icon: Icon,
-}: {
-  label: string;
-  value: React.ReactNode;
-  icon: typeof Wallet;
-}) {
-  return (
-    <div className="space-y-1">
-      <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        <Icon className="size-3.5" /> {label}
-      </p>
-      <p className="text-lg font-semibold tabular-nums">{value}</p>
-    </div>
   );
 }

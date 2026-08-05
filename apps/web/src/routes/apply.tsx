@@ -14,10 +14,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Check, CircleAlert, Loader2, Sparkles, Wallet, TrendingUp, Receipt } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  ArrowLeft, ArrowRight, Check, CircleAlert, Loader2, Sparkles, Wallet,
+  TrendingUp, ShieldCheck, CheckCircle2, Calculator, RefreshCw
+} from 'lucide-react';
 
 const TERMS = [
   { v: '6', l: '6 months' },
@@ -26,12 +29,12 @@ const TERMS = [
   { v: '36', l: '36 months' },
 ];
 const RATES = [
-  { v: '1000', l: '10%' },
-  { v: '1200', l: '12%' },
-  { v: '1500', l: '15%' },
-  { v: '1800', l: '18%' },
-  { v: '2000', l: '20%' },
-  { v: '2400', l: '24%' },
+  { v: '1000', l: '10% APR' },
+  { v: '1200', l: '12% APR' },
+  { v: '1500', l: '15% APR' },
+  { v: '1800', l: '18% APR' },
+  { v: '2000', l: '20% APR' },
+  { v: '2400', l: '24% APR' },
 ];
 
 const STEP_FIELDS: Array<keyof AppT>[] = [
@@ -40,350 +43,427 @@ const STEP_FIELDS: Array<keyof AppT>[] = [
   [],
 ];
 
-const STEP_TITLES = ['Loan details', 'Purpose & employment', 'Review & submit'];
+const STEP_TITLES = ['Loan Details', 'Purpose & Employment', 'Review & Submit'];
 
-function emiPreview(amountCents: number, termMonths: number, annualRateBps: number): number {
-  const principal = amountCents / 100;
-  const monthlyRate = annualRateBps / 10_000 / 12;
-  if (monthlyRate === 0) return Math.round(principal / termMonths);
-  const r = monthlyRate;
-  const n = termMonths;
-  const emi = (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-  return Math.round(emi);
+function calculateEmiCents(amountCents: number, termMonths: number, annualRateBps: number): number {
+  if (!amountCents || !termMonths) return 0;
+  const r = annualRateBps / 10000 / 12;
+  if (r === 0) return Math.round(amountCents / termMonths);
+  const pow = Math.pow(1 + r, termMonths);
+  return Math.round((amountCents * r * pow) / (pow - 1));
 }
 
 export function Apply() {
   const [step, setStep] = useState(0);
   const [result, setResult] = useState<null | { status: string; reason: string | null }>(null);
+  const nav = useNavigate();
+
   const form = useForm<AppT>({
     resolver: zodResolver(ApplicationInput),
-    mode: 'onTouched',
-    defaultValues: { amount: 50_000_00, termMonths: 12, annualRateBps: 1500, purpose: '', employment: 'salaried' },
+    defaultValues: {
+      amount: 5000000, // ₹50,000 in cents
+      termMonths: 12,
+      annualRateBps: 1500,
+      purpose: 'Home renovation',
+      employment: 'salaried',
+    },
   });
+
   const create = useCreateApplication();
-  const values = form.watch();
-  const monthlyEmi = useMemo(
-    () => emiPreview(values.amount, values.termMonths, values.annualRateBps),
-    [values.amount, values.termMonths, values.annualRateBps]
+
+  const currentAmount = form.watch('amount') || 0;
+  const currentTerm = form.watch('termMonths') || 12;
+  const currentRate = form.watch('annualRateBps') || 1500;
+
+  const estimatedEmiCents = useMemo(
+    () => calculateEmiCents(currentAmount, currentTerm, currentRate),
+    [currentAmount, currentTerm, currentRate]
   );
 
-  async function goNext() {
-    const fields = STEP_FIELDS[step];
-    const ok = await form.trigger(fields as Parameters<typeof form.trigger>[0]);
-    if (ok) setStep((s) => Math.min(2, s + 1));
-  }
+  const totalRepaymentCents = estimatedEmiCents * currentTerm;
+  const totalInterestCents = Math.max(0, totalRepaymentCents - currentAmount);
 
+  // Result Screen (Approved / Pending / Rejected)
   if (result) {
-    const rejected = result.status === 'rejected';
+    const isApprovedOrPending = result.status === 'approved' || result.status === 'pending';
     return (
-      <main className="relative min-h-screen bg-background">
-        <div className="bg-grid absolute inset-0 -z-10" aria-hidden />
-        <header className="border-b">
-          <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-            <Button variant="ghost" size="sm" render={<Link to="/dashboard" />}>
-              <ArrowLeft />
-              Dashboard
-            </Button>
-            <span className="text-sm text-muted-foreground">Step 3 of 3</span>
+      <main className="min-h-screen bg-[#FAF7F0] text-[#2C40A7] font-sans p-6 flex items-center justify-center">
+        <div className="max-w-lg w-full rounded-2xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-8 shadow-[6px_6px_0px_#2C40A7] text-center space-y-6 relative">
+          
+          <div className="flex justify-center">
+            <div className={`size-16 rounded-2xl border-2 border-[#2C40A7] flex items-center justify-center shadow-[3px_3px_0px_#2C40A7] ${
+              isApprovedOrPending ? 'bg-[#F237A1] text-white' : 'bg-[#DC2626] text-white'
+            }`}>
+              {isApprovedOrPending ? <Check className="size-8 stroke-[3]" /> : <CircleAlert className="size-8 stroke-[3]" />}
+            </div>
           </div>
-        </header>
-        <div className="mx-auto flex max-w-xl flex-col items-center px-6 py-16 text-center">
-          <span
-            className={
-              'flex size-14 items-center justify-center rounded-full ' +
-              (rejected ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary')
-            }
-          >
-            {rejected ? <CircleAlert className="size-7" /> : <Check className="size-7" />}
-          </span>
-          <h1 className="mt-5 text-2xl font-semibold tracking-tight">
-            {rejected ? 'Application rejected' : 'Application submitted'}
-          </h1>
-          <p className="mt-2 text-balance text-sm text-muted-foreground">
-            {rejected
-              ? 'Your application did not meet the eligibility criteria. You can review the reason below or try a different amount and term.'
-              : 'Your application is now pending review. We will notify you once an admin has decided.'}
-          </p>
-          {result.reason ? (
-            <Card className="mt-6 w-full text-left">
-              <CardContent className="p-4 text-sm">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Decision reason</p>
-                <p className="mt-1">{result.reason}</p>
-              </CardContent>
-            </Card>
-          ) : null}
-          <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-            <Button render={<Link to="/dashboard" />}>
-              View dashboard
-              <ArrowRight />
-            </Button>
-            {!rejected ? (
-              <Button variant="outline" onClick={() => { setResult(null); setStep(0); form.reset(); }}>
-                Apply for another loan
-              </Button>
-            ) : (
-              <Button variant="outline" onClick={() => { setResult(null); setStep(0); }}>
-                Try again
-              </Button>
-            )}
+
+          <div>
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#2C40A7]/70 block mb-1">
+              APPLICATION STATUS RESULT
+            </span>
+            <h1 className="text-3xl font-extrabold text-[#2C40A7]">
+              Application {result.status.toUpperCase()}
+            </h1>
+            <p className="mt-2 text-sm text-[#2C40A7]/80 font-medium">
+              {isApprovedOrPending
+                ? 'Your loan application has passed initial checks and is ready in your dashboard.'
+                : (result.reason ?? 'Your application did not meet underwriting income criteria.')}
+            </p>
           </div>
+
+          {result.reason && !isApprovedOrPending && (
+            <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FDE8F3] p-4 text-left font-mono text-xs font-bold text-[#2C40A7]">
+              <span className="text-[#F237A1] block mb-0.5">UNDERWRITING REASON:</span>
+              {result.reason}
+            </div>
+          )}
+
+          <div className="pt-4 border-t-2 border-[#2C40A7]/20 flex flex-col sm:flex-row gap-3 justify-center">
+            <Button size="lg" onClick={() => nav('/dashboard')}>
+              Go to Dashboard
+              <ArrowRight className="size-4" />
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => {
+                setResult(null);
+                setStep(0);
+                form.reset();
+              }}
+            >
+              <RefreshCw className="size-4 text-[#F237A1]" />
+              New Application
+            </Button>
+          </div>
+
         </div>
       </main>
     );
   }
 
   return (
-    <main className="relative min-h-screen bg-background">
-        <div className="bg-grid absolute inset-0 -z-10" aria-hidden />
-      <header className="border-b">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-          <Button variant="ghost" size="sm" render={<Link to="/dashboard" />}>
-            <ArrowLeft />
-            Dashboard
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            Step {step + 1} of 3 — {STEP_TITLES[step]}
-          </span>
-        </div>
-        <div className="mx-auto h-1 max-w-3xl overflow-hidden bg-muted px-6">
-          <div
-            className="h-full bg-primary transition-all"
-            style={{ width: `${((step + 1) / 3) * 100}%` }}
-            role="progressbar"
-            aria-valuenow={step + 1}
-            aria-valuemin={1}
-            aria-valuemax={3}
-          />
+    <main className="min-h-screen bg-[#FAF7F0] text-[#2C40A7] font-sans selection:bg-[#F237A1] selection:text-white pb-20">
+      
+      {/* Top Bar Navigation */}
+      <header className="border-b-2 border-[#2C40A7] bg-[#FAF7F0] sticky top-0 z-40">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <Link to="/dashboard" className="flex items-center gap-2 text-sm font-bold hover:text-[#F237A1] transition-colors">
+            <ArrowLeft className="size-4 stroke-[2.5]" />
+            Back to Dashboard
+          </Link>
+          <div className="flex items-center gap-2">
+            <span className="flex size-7 items-center justify-center rounded bg-[#F237A1] text-white text-xs font-bold border border-[#2C40A7]">
+              LM
+            </span>
+            <span className="font-extrabold text-base">Loan Wizard</span>
+          </div>
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-3xl gap-6 px-6 py-8 lg:grid-cols-[1fr_240px]">
-        <Card>
-          <CardContent className="p-6">
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit((v) =>
-                  create.mutate(v, {
-                    onSuccess: (data) =>
-                      setResult({ status: data.application.status, reason: data.application.decisionReason }),
-                    onError: (e) => toast.error((e as Error).message),
-                  })
-                )}
-                className="space-y-5"
-              >
-                {step === 0 && (
-                  <div className="space-y-5">
-                    <FormField
-                      control={form.control}
-                      name="amount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Amount (₹)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min={1000}
-                              step={500}
-                              value={field.value / 100}
-                              onChange={(e) => field.onChange(Math.round(Number(e.target.value) * 100))}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="termMonths"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Term</FormLabel>
-                          <Select value={String(field.value)} onValueChange={(v) => field.onChange(Number(v))}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {TERMS.map((t) => (
-                                <SelectItem key={t.v} value={t.v}>
-                                  {t.l}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="annualRateBps"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Interest rate</FormLabel>
-                          <Select value={String(field.value)} onValueChange={(v) => field.onChange(Number(v))}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {RATES.map((t) => (
-                                <SelectItem key={t.v} value={t.v}>
-                                  {t.l}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                )}
+      {/* Main Content Area */}
+      <div className="mx-auto max-w-6xl px-6 pt-8 space-y-8">
+        
+        {/* Step Indicator Bar */}
+        <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-4 shadow-[3.5px_3.5px_0px_#2C40A7] flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="flex size-8 items-center justify-center rounded-lg bg-[#2C40A7] text-white font-mono font-bold text-sm">
+              {step + 1}
+            </span>
+            <div>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2C40A7]/70 block">
+                STEP {step + 1} OF 3
+              </span>
+              <h2 className="text-lg font-extrabold text-[#2C40A7]">{STEP_TITLES[step]}</h2>
+            </div>
+          </div>
 
-                {step === 1 && (
-                  <div className="space-y-5">
-                    <FormField
-                      control={form.control}
-                      name="purpose"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Purpose</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g. Home renovation, Medical, Travel" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="employment"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Employment</FormLabel>
-                          <Select value={field.value} onValueChange={field.onChange}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="salaried">Salaried</SelectItem>
-                              <SelectItem value="self_employed">Self-employed</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                )}
+          {/* Step Pills */}
+          <div className="flex items-center gap-2">
+            {STEP_TITLES.map((title, idx) => (
+              <div
+                key={title}
+                className={`h-2.5 rounded-full transition-all border border-[#2C40A7] ${
+                  idx === step
+                    ? 'w-10 bg-[#F237A1]'
+                    : idx < step
+                    ? 'w-6 bg-[#2C40A7]'
+                    : 'w-6 bg-[#FDE8F3]'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
 
-                {step === 2 && (
-                  <div className="space-y-4">
-                    <h2 className="text-base font-semibold">Review your application</h2>
-                    <dl className="divide-y rounded-lg border text-sm">
-                      <ReviewRow label="Amount" value={`₹${(values.amount / 100).toLocaleString('en-IN')}`} />
-                      <ReviewRow label="Term" value={`${values.termMonths} months`} />
-                      <ReviewRow label="Interest rate" value={`${(values.annualRateBps / 100).toFixed(2)}%`} />
-                      <ReviewRow label="Purpose" value={values.purpose} />
-                      <ReviewRow label="Employment" value={values.employment === 'salaried' ? 'Salaried' : 'Self-employed'} />
-                      <ReviewRow label="Estimated EMI" value={`₹${monthlyEmi.toLocaleString('en-IN')}`} bold />
-                    </dl>
-                    <p className="text-xs text-muted-foreground">
-                      By submitting, you confirm the information is accurate. An admin will review your application.
-                    </p>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between pt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setStep((s) => Math.max(0, s - 1))}
-                    disabled={step === 0}
-                  >
-                    <ArrowLeft />
-                    Back
-                  </Button>
-                  {step < 2 ? (
-                    <Button type="button" onClick={goNext}>
-                      Next
-                      <ArrowRight />
-                    </Button>
-                  ) : (
-                    <Button type="submit" disabled={create.isPending}>
-                      {create.isPending ? <Loader2 className="animate-spin" /> : null}
-                      {create.isPending ? 'Submitting' : 'Submit application'}
-                    </Button>
+        {/* 2-Column Grid (Form + Live EMI Summary Box) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Left Column: Multi-step Form Card */}
+          <div className="lg:col-span-7">
+            <div className="rounded-2xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-6 sm:p-8 shadow-[5px_5px_0px_#2C40A7]">
+              
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit((v) =>
+                    create.mutate(v, {
+                      onSuccess: (data) =>
+                        setResult({
+                          status: data.application.status,
+                          reason: data.application.decisionReason,
+                        }),
+                      onError: (e) => toast.error((e as Error).message),
+                    })
                   )}
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
+                  className="space-y-6"
+                >
 
-        <aside className="space-y-3 lg:sticky lg:top-6 lg:self-start">
-          <Card>
-            <CardContent className="space-y-3 p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">What's happening</p>
-              <SidebarItem
-                icon={Wallet}
-                title="You submit"
-                body="Your application enters the review queue."
-              />
-              <SidebarItem
-                icon={Sparkles}
-                title="Admin reviews"
-                body="An admin checks eligibility and decides."
-              />
-              <SidebarItem
-                icon={Receipt}
-                title="Disbursement"
-                body="Approved loans are disbursed and a schedule is created."
-              />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="space-y-1 p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Estimated EMI</p>
-              <p className="text-2xl font-semibold tabular-nums">
-                ₹{monthlyEmi.toLocaleString('en-IN')}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                For ₹{(values.amount / 100).toLocaleString('en-IN')} over {values.termMonths} months at{' '}
-                {(values.annualRateBps / 100).toFixed(2)}% APR.
-              </p>
-            </CardContent>
-          </Card>
-        </aside>
+                  {/* Step 1: Loan Amount, Tenure, Rate */}
+                  {step === 0 && (
+                    <div className="space-y-5">
+                      <FormField
+                        control={form.control}
+                        name="amount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-[#2C40A7]">
+                              Loan Amount (₹)
+                            </FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono font-bold text-[#2C40A7]">₹</span>
+                                <Input
+                                  type="number"
+                                  className="pl-7 font-mono font-bold text-base"
+                                  value={field.value ? field.value / 100 : ''}
+                                  onChange={(e) => field.onChange(Math.round(Number(e.target.value) * 100))}
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="termMonths"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-[#2C40A7]">
+                              Tenure (Months)
+                            </FormLabel>
+                            <Select value={String(field.value)} onValueChange={(v) => field.onChange(Number(v))}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {TERMS.map((t) => (
+                                  <SelectItem key={t.v} value={t.v}>
+                                    {t.l}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="annualRateBps"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-[#2C40A7]">
+                              Interest Rate (APR)
+                            </FormLabel>
+                            <Select value={String(field.value)} onValueChange={(v) => field.onChange(Number(v))}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {RATES.map((r) => (
+                                  <SelectItem key={r.v} value={r.v}>
+                                    {r.l}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+
+                  {/* Step 2: Purpose & Employment */}
+                  {step === 1 && (
+                    <div className="space-y-5">
+                      <FormField
+                        control={form.control}
+                        name="purpose"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-[#2C40A7]">
+                              Loan Purpose
+                            </FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g. Home renovation, Medical expense..." {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="employment"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-[#2C40A7]">
+                              Employment Status
+                            </FormLabel>
+                            <Select value={field.value} onValueChange={field.onChange}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="salaried">Salaried Employee</SelectItem>
+                                <SelectItem value="self_employed">Self-Employed / Business Owner</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+
+                  {/* Step 3: Review & Final Confirmation */}
+                  {step === 2 && (
+                    <div className="space-y-4">
+                      <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FAF7F0] p-4 space-y-3 font-mono text-xs font-bold text-[#2C40A7]">
+                        <div className="flex justify-between py-1 border-b border-[#2C40A7]/20">
+                          <span className="text-[#2C40A7]/70">REQUESTED AMOUNT:</span>
+                          <span className="text-sm text-[#F237A1]">₹{(currentAmount / 100).toLocaleString('en-IN')}</span>
+                        </div>
+                        <div className="flex justify-between py-1 border-b border-[#2C40A7]/20">
+                          <span className="text-[#2C40A7]/70">TENURE:</span>
+                          <span>{currentTerm} Months</span>
+                        </div>
+                        <div className="flex justify-between py-1 border-b border-[#2C40A7]/20">
+                          <span className="text-[#2C40A7]/70">INTEREST RATE:</span>
+                          <span>{(currentRate / 100).toFixed(2)}% APR</span>
+                        </div>
+                        <div className="flex justify-between py-1 border-b border-[#2C40A7]/20">
+                          <span className="text-[#2C40A7]/70">PURPOSE:</span>
+                          <span className="capitalize">{form.getValues('purpose')}</span>
+                        </div>
+                        <div className="flex justify-between py-1">
+                          <span className="text-[#2C40A7]/70">EMPLOYMENT:</span>
+                          <span className="capitalize">{form.getValues('employment')}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Wizard Step Controls */}
+                  <div className="flex items-center justify-between pt-4 border-t-2 border-[#2C40A7]/20">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setStep((s) => Math.max(0, s - 1))}
+                      disabled={step === 0}
+                    >
+                      <ArrowLeft className="size-4" />
+                      Back
+                    </Button>
+
+                    {step < 2 ? (
+                      <Button
+                        type="button"
+                        onClick={async () => {
+                          const ok = await form.trigger(STEP_FIELDS[step]);
+                          if (ok) setStep((s) => s + 1);
+                        }}
+                      >
+                        Next Step
+                        <ArrowRight className="size-4" />
+                      </Button>
+                    ) : (
+                      <Button type="submit" disabled={create.isPending}>
+                        {create.isPending ? (
+                          <>
+                            <Loader2 className="size-4 animate-spin" />
+                            Evaluating...
+                          </>
+                        ) : (
+                          <>
+                            Submit Loan Application
+                            <CheckCircle2 className="size-4 stroke-[2.5]" />
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+
+                </form>
+              </Form>
+
+            </div>
+          </div>
+
+          {/* Right Column: Live Riso EMI Calculator Box */}
+          <div className="lg:col-span-5">
+            <div className="rounded-2xl border-2 border-[#2C40A7] bg-[#FDE8F3] p-6 shadow-[5px_5px_0px_#2C40A7] space-y-5 sticky top-24">
+              <div className="flex items-center gap-2 border-b-2 border-[#2C40A7] pb-3">
+                <Calculator className="size-5 text-[#F237A1]" />
+                <h3 className="font-extrabold text-base text-[#2C40A7]">Live Loan Estimate</h3>
+              </div>
+
+              <div className="space-y-3 font-mono text-xs font-bold text-[#2C40A7]">
+                <div className="bg-[#FFFDF8] p-4 rounded-xl border-2 border-[#2C40A7] shadow-[2px_2px_0px_#2C40A7]">
+                  <span className="text-[10px] text-[#2C40A7]/70 uppercase block mb-1">
+                    ESTIMATED MONTHLY EMI
+                  </span>
+                  <div className="text-3xl font-extrabold text-[#F237A1]">
+                    ₹{(estimatedEmiCents / 100).toLocaleString('en-IN')}<span className="text-xs font-normal text-[#2C40A7]/70"> / mo</span>
+                  </div>
+                </div>
+
+                <div className="bg-[#FFFDF8] p-3 rounded-lg border border-[#2C40A7]/40 space-y-1.5">
+                  <div className="flex justify-between">
+                    <span className="text-[#2C40A7]/70">Principal:</span>
+                    <span>₹{(currentAmount / 100).toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#2C40A7]/70">Est. Total Interest:</span>
+                    <span>₹{(totalInterestCents / 100).toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between pt-1 border-t border-[#2C40A7]/20 text-[#2C40A7]">
+                    <span>Est. Total Payable:</span>
+                    <span>₹{(totalRepaymentCents / 100).toLocaleString('en-IN')}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs font-bold text-[#2C40A7]">
+                <ShieldCheck className="size-4 text-[#F237A1] shrink-0" />
+                <span>Instant rule-based underwriting on submission</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
       </div>
     </main>
-  );
-}
-
-function ReviewRow({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
-  return (
-    <div className="flex items-center justify-between px-3 py-2.5">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className={bold ? 'font-semibold tabular-nums' : 'tabular-nums'}>{value}</dd>
-    </div>
-  );
-}
-
-function SidebarItem({ icon: Icon, title, body }: { icon: typeof TrendingUp; title: string; body: string }) {
-  return (
-    <div className="flex items-start gap-2.5">
-      <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-        <Icon className="size-3.5" />
-      </span>
-      <div className="space-y-0.5">
-        <p className="text-sm font-medium">{title}</p>
-        <p className="text-xs text-muted-foreground">{body}</p>
-      </div>
-    </div>
   );
 }

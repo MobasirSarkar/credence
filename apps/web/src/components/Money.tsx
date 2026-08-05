@@ -6,6 +6,6 @@
  */
 
 import { formatINR } from '@/lib/format';
-export function Money({ cents }: { cents: number }) {
-  return <span className="tabular-nums">{formatINR(cents)}</span>;
+export function Money({ cents, className = '' }: { cents: number; className?: string }) {
+  return <span className={`tabular-nums font-mono font-bold ${className}`}>{formatINR(cents)}</span>;
 }
