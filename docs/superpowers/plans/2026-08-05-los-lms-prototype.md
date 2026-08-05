@@ -701,8 +701,8 @@ import { calculateEmi, generateSchedule } from '../src/domain/amortization.js';
 test('calculateEmi matches closed-form for standard input', () => {
   // P=5,000,000 cents (₹50,000), 15% APR, 12 months
   const emi = calculateEmi(5_000_000, 1500, 12);
-  // closed-form: 50000 * 0.0125 * 1.0125^12 / (1.0125^12 - 1) ≈ 4508.35
-  assert.ok(Math.abs(emi - 450835) <= 5, `emi was ${emi}`);
+  // closed-form: 50000 * 0.0125 * 1.0125^12 / (1.0125^12 - 1) ≈ 4512.88 (1.0125^12 ≈ 1.16075452)
+  assert.ok(Math.abs(emi - 451288) <= 5, `emi was ${emi}`);
 });
 
 test('calculateEmi handles zero rate', () => {
@@ -846,11 +846,9 @@ test('approves a healthy application', () => {
   assert.equal(r.reason, undefined);
 });
 
-test('boundary: FOIR exactly 0.50 is approved', () => {
-  // Solve for income: EMI / income = 0.50 → income = 2 * EMI
-  const emi = 4_50835; // approximate; we just need income such that emi/income <= 0.5
-  // Use income = 2 * emi + 1 to be safely under
-  const r = evaluate(2 * emi + 1, 5_000_000, 1500, 12);
+test('approves at the 3x income boundary', () => {
+  // 3x rule is the tightest floor; income = 3 * EMI + 1 passes both rules (FOIR ≈ 0.33).
+  const r = evaluate(3 * 451292 + 1, 5_000_000, 1500, 12);
   assert.equal(r.recommendation, 'approve');
 });
 ```

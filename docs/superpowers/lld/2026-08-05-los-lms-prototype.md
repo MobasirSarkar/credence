@@ -229,8 +229,8 @@ export function generateSchedule(
 5. `dueDate` = add `i` months to `startDate` (using `date-fns/addMonths` with end-of-month clamp).
 
 **Worked example** (₹50,000, 15% APR, 12 months, start 2026-01-01):
-- `r = 0.0125`, `N = 12`, `emi ≈ 4,508.35` cents = ₹4,508.35.
-- Final installment absorbs ~₹0.07 rounding.
+- `r = 0.0125`, `N = 12`, `emi ≈ 4,512.88` cents = ₹4,512.88.
+- Final installment absorbs ~₹0.12 rounding.
 - Schedule sums exactly to ₹50,000.00.
 
 ## 5. Underwriting (`apps/api/src/domain/underwriting.ts`)
