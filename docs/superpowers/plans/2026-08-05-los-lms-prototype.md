@@ -20,6 +20,8 @@
 - **Tests use `node --test`** with `tsx` loader, no test framework. Tests boot the Fastify app against an in-memory SQLite.
 - **Commit messages are conventional-commits style.** One commit per task.
 - **Never commit secrets.** `.env` is gitignored; `.env.example` is the only env file in the repo.
+- **All Rights Reserved copyright.** Every source file (`.ts`, `.tsx`, `.mjs`, `.js`) starts with the header in `.header.txt` (verbatim). The repo carries a top-level `LICENSE` file declaring "All Rights Reserved" by `Mobasher Ali (https://github.com/mobas)`. PDFs of the HLD and LLD include a copyright cover page and a footer on every page. Render the PDFs with `pnpm pdf` from repo root.
+- **Find-and-replace before going public.** The name `Mobasher Ali`, GitHub `mobas`, and `mobas@example.com` in `LICENSE`, `.header.txt`, and `tools/render-pdf.mjs` are placeholders — replace with the real values in one pass when the user provides them.
 
 ---
 
@@ -68,7 +70,7 @@ practice/lms/
 ## Task 1: Workspace scaffolding
 
 **Files:**
-- Create: `package.json`, `pnpm-workspace.yaml`, `tsconfig.base.json`, `.gitignore`, `.editorconfig`, `.npmrc`
+- Create: `package.json`, `pnpm-workspace.yaml`, `tsconfig.base.json`, `.gitignore`, `.editorconfig`, `.npmrc`, `LICENSE`, `.header.txt`, `tools/render-pdf.mjs`
 
 **Interfaces:** none.
 
@@ -102,9 +104,12 @@ packages:
     "seed": "pnpm --filter @lms/api run seed",
     "test": "pnpm --filter @lms/api test",
     "start": "pnpm --filter @lms/api start",
-    "typecheck": "pnpm -r run typecheck"
+    "typecheck": "pnpm -r run typecheck",
+    "pdf": "node tools/render-pdf.mjs"
   },
   "devDependencies": {
+    "marked": "^12.0.2",
+    "puppeteer": "^23.0.0",
     "typescript": "^5.5.0"
   },
   "packageManager": "pnpm@9.6.0"
@@ -146,6 +151,38 @@ apps/api/data/
 coverage/
 .pnpm-store/
 ```
+- [ ] **Step 5a: Write `LICENSE` (All Rights Reserved)**
+
+Replace the placeholder with the real `Mobasher Ali` / `mobas` / `mobas@example.com` values before going public. The text is intentionally strict (no MIT/Apache grant); only the copyright holder can grant usage rights.
+
+```
+All Rights Reserved.
+
+Copyright (c) 2026 Mobasher Ali (https://github.com/mobas)
+
+NO PERMISSION IS GRANTED to use, copy, modify, merge, publish, distribute,
+sublicense, or sell copies of this repository or any of its contents
+without the prior written permission of the copyright holder.
+
+Contact: mobas@example.com
+```
+
+- [ ] **Step 5b: Write `.header.txt` (the copyright header every source file starts with)**
+
+This exact text is the first thing in every `.ts`, `.tsx`, `.mjs`, and `.js` file:
+
+```
+/*
+ * Copyright (c) 2026 Mobasher Ali (https://github.com/mobas)
+ * All Rights Reserved.
+ *
+ * See LICENSE at the root of this repository.
+ */
+```
+
+- [ ] **Step 5c: Write `tools/render-pdf.mjs` (PDF render script)**
+
+This script (Puppeteer + marked) generates the HLD and LLD PDFs with a copyright cover page and a footer on every page. Copy the contents of `tools/render-pdf.mjs` verbatim from this repository (it is already on disk from the planning phase). It reads the two `.md` files, renders them through `marked`, wraps the HTML with a cover-page stylesheet, and writes the two `.pdf` files.
 
 - [ ] **Step 6: Verify install works**
 
@@ -156,8 +193,8 @@ Expected: creates `node_modules` and `pnpm-lock.yaml`; no errors.
 
 ```bash
 cd "C:/Users/mobas/practice/lms"
-git add package.json pnpm-workspace.yaml tsconfig.base.json .gitignore .npmrc
-git commit -m "chore: scaffold pnpm workspace"
+git add package.json pnpm-workspace.yaml tsconfig.base.json .gitignore .npmrc LICENSE .header.txt tools/render-pdf.mjs
+git commit -m "chore: scaffold pnpm workspace + license + pdf tooling"
 ```
 
 ---
@@ -3128,6 +3165,11 @@ See [docs/superpowers/hld/2026-08-05-los-lms-prototype.md](docs/superpowers/hld/
 The free tier has 1 GB of persistent disk; the SQLite file lives at `/data/lms.db`.
 ```
 
+- [ ] **Step 3a: Render the HLD and LLD PDFs**
+
+Run: `cd "C:/Users/mobas/practice/lms" && pnpm pdf`
+Expected: writes `docs/superpowers/hld/2026-08-05-los-lms-prototype.pdf` and `docs/superpowers/lld/2026-08-05-los-lms-prototype.pdf` with a copyright cover page and a footer on every page. The PDFs are deliverables for the assignment submission, so they are committed to the repo.
+
 - [ ] **Step 4: Verify README renders correctly**
 
 Run: `cd "C:/Users/mobas/practice/lms" && head -30 README.md`
@@ -3135,10 +3177,9 @@ Expected: looks like the markdown above.
 
 - [ ] **Step 5: Commit**
 
-```bash
-cd "C:/Users/mobas/practice/lms"
-git add render.yaml README.md .env.example
-git commit -m "docs: render deploy config, readme, env example"
+git add render.yaml README.md .env.example docs/superpowers/hld/*.pdf docs/superpowers/lld/*.pdf
+git commit -m "docs: render deploy config, readme, env example, hld/lld pdfs"
+
 ```
 
 ---
