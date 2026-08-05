@@ -12,15 +12,13 @@ import { useLogout } from '@/hooks/useAuth';
 import { useApplications } from '@/hooks/useApplications';
 import { useLoans } from '@/hooks/useLoans';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Money } from '@/components/Money';
 import { formatDate } from '@/lib/format';
 import {
   ArrowRight, FileText, Receipt, TrendingUp, Wallet, Plus, Search,
-  Bell, LogOut, CheckCircle2, ShieldCheck, Clock, User
+  LogOut, User
 } from 'lucide-react';
-import type { ApplicationDTO, LoanDTO } from '@lms/shared';
 
 export function Dashboard() {
   const me = useMe();
@@ -32,25 +30,27 @@ export function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const userName = me.data?.user.fullName ?? 'Borrower';
-  const isPendingLoading = apps.isLoading || loans.isLoading;
-
-  const totalDisbursedCents = (loans.data?.loans ?? []).reduce((sum, l) => sum + l.principal, 0);
-  const totalOutstandingCents = (loans.data?.loans ?? []).reduce((sum, l) => sum + l.outstanding, 0);
-  const activeLoansCount = (loans.data?.loans ?? []).filter((l) => l.status === 'active').length;
+  const allLoansList = loans.data?.loans ?? [];
+  const totalDisbursedCents = allLoansList.reduce((sum, l) => sum + l.principal, 0);
+  const totalOutstandingCents = allLoansList.reduce((sum, l) => sum + l.outstanding, 0);
+  const activeLoansCount = allLoansList.filter((l) => l.status === 'active').length;
   const pendingAppsCount = (apps.data?.applications ?? []).filter((a) => a.status === 'pending').length;
+
+  const totalLoansCount = allLoansList.length;
+  const avgLoanCents = totalLoansCount > 0 ? Math.round(totalDisbursedCents / totalLoansCount) : 0;
 
   // Filter applications & loans by search
   const filteredApps = (apps.data?.applications ?? []).filter(
     (a) => a.purpose.toLowerCase().includes(searchQuery.toLowerCase()) || a.status.includes(searchQuery.toLowerCase())
   );
-  const filteredLoans = (loans.data?.loans ?? []).filter(
+  const filteredLoans = allLoansList.filter(
     (l) => l.id.toLowerCase().includes(searchQuery.toLowerCase()) || l.status.includes(searchQuery.toLowerCase())
   );
 
   return (
     <main className="min-h-screen bg-[#FAF7F0] text-[#2C40A7] font-sans selection:bg-[#F237A1] selection:text-white pb-20">
       
-      {/* Top Operations Header (Matching Image #1) */}
+      {/* Top Operations Header */}
       <header className="border-b-2 border-[#2C40A7] bg-[#FAF7F0] sticky top-0 z-40">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
           
@@ -113,7 +113,7 @@ export function Dashboard() {
 
         </div>
 
-        {/* Sub-Header Navigation Tabs (Matching Image #1) */}
+        {/* Sub-Header Navigation Tabs */}
         <div className="border-t border-[#2C40A7]/20 bg-[#FAF7F0] px-6">
           <div className="mx-auto max-w-7xl flex items-center gap-8 text-sm font-bold pt-2 pb-0">
             <button
@@ -163,14 +163,14 @@ export function Dashboard() {
       {/* Main Dashboard Content */}
       <div className="mx-auto max-w-7xl px-6 pt-8 space-y-8">
         
-        {/* Page Title & Breadcrumb */}
+        {/* Page Title & Action */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#2C40A7]/70">
-              PRODUCTION DASHBOARD
+              {activeTab === 'overview' ? 'PRODUCTION DASHBOARD' : activeTab === 'applications' ? 'LOAN APPLICATIONS' : 'ACTIVE LOAN PORTFOLIO'}
             </span>
             <h1 className="text-3xl font-extrabold text-[#2C40A7]">
-              Welcome back, {userName}
+              {activeTab === 'overview' ? `Welcome back, ${userName}` : activeTab === 'applications' ? 'Your Applications' : 'Your Active Loans'}
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -181,87 +181,96 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* 4 Riso Stat Cards Grid (Matching Image #1 layout) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          
-          {/* Stat 1: Total Disbursed */}
-          <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-5 shadow-[4px_4px_0px_#2C40A7] relative overflow-hidden">
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#2C40A7]/70 block mb-1">
-              TOTAL DISBURSED
-            </span>
-            <div className="text-3xl font-extrabold font-mono text-[#2C40A7]">
-              <Money cents={totalDisbursedCents} />
-            </div>
-            <div className="mt-3 flex items-center justify-between text-xs font-bold text-[#F237A1]">
-              <span className="flex items-center gap-1">
-                <TrendingUp className="size-3.5" />
-                +12% vs last month
+        {/* 4 Riso Stat Cards Grid — SHOWN ONLY ON OVERVIEW TAB */}
+        {activeTab === 'overview' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            {/* Stat 1: Total Disbursed */}
+            <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-5 shadow-[4px_4px_0px_#2C40A7] relative overflow-hidden">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#2C40A7]/70 block mb-1">
+                TOTAL DISBURSED
               </span>
+              <div className="text-3xl font-extrabold font-mono text-[#2C40A7]">
+                <Money cents={totalDisbursedCents} />
+              </div>
+              <div className="mt-3 flex items-center justify-between text-xs font-bold text-[#F237A1]">
+                <span className="flex items-center gap-1">
+                  <TrendingUp className="size-3.5" />
+                  {totalLoansCount > 0 ? `${totalLoansCount} loan(s) issued` : 'No loans issued yet'}
+                </span>
+                {avgLoanCents > 0 && (
+                  <span className="text-[10px] font-mono text-[#2C40A7]/70 font-normal">
+                    Avg ₹{(avgLoanCents / 100).toLocaleString('en-IN')}
+                  </span>
+                )}
+              </div>
+              <div className="mt-3 h-1.5 w-full bg-[#FDE8F3] rounded-full overflow-hidden border border-[#2C40A7]">
+                <div
+                  className="h-full bg-[#F237A1] rounded-full transition-all"
+                  style={{ width: `${totalLoansCount > 0 ? Math.min(100, totalLoansCount * 25) : 0}%` }}
+                />
+              </div>
             </div>
-            {/* Sparkline decoration (Riso Pink line matching Image #1) */}
-            <div className="mt-3 h-1.5 w-full bg-[#FDE8F3] rounded-full overflow-hidden border border-[#2C40A7]">
-              <div className="h-full bg-[#F237A1] w-3/4 rounded-full" />
+
+            {/* Stat 2: Active Loans */}
+            <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-5 shadow-[4px_4px_0px_#2C40A7] relative overflow-hidden">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#2C40A7]/70 block mb-1">
+                ACTIVE LOANS
+              </span>
+              <div className="text-3xl font-extrabold font-mono text-[#2C40A7]">
+                {activeLoansCount}
+              </div>
+              <div className="mt-3 text-xs font-bold text-[#2C40A7]/80">
+                {activeLoansCount > 0 ? `${activeLoansCount} active repayment schedule(s)` : 'No active loans'}
+              </div>
+              <div className="mt-3 h-1.5 w-full bg-[#EEF2FF] rounded-full overflow-hidden border border-[#2C40A7]">
+                <div className="h-full bg-[#2C40A7] w-1/2 rounded-full" />
+              </div>
             </div>
+
+            {/* Stat 3: Outstanding Principal */}
+            <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-5 shadow-[4px_4px_0px_#2C40A7] relative overflow-hidden">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#2C40A7]/70 block mb-1">
+                OUTSTANDING PRINCIPAL
+              </span>
+              <div className="text-3xl font-extrabold font-mono text-[#2C40A7]">
+                <Money cents={totalOutstandingCents} />
+              </div>
+              <div className="mt-3 text-xs font-bold text-[#2C40A7]/80">
+                {totalDisbursedCents > 0
+                  ? `${Math.round(((totalDisbursedCents - totalOutstandingCents) / totalDisbursedCents) * 100)}% repaid so far`
+                  : 'Zero balance'}
+              </div>
+              <div className="mt-3 h-1.5 w-full bg-[#FAF7F0] rounded-full overflow-hidden border border-[#2C40A7]">
+                <div
+                  className="h-full bg-[#F237A1] rounded-full transition-all"
+                  style={{
+                    width: `${totalDisbursedCents > 0 ? Math.round(((totalDisbursedCents - totalOutstandingCents) / totalDisbursedCents) * 100) : 0}%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Stat 4: Pending Approvals */}
+            <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-5 shadow-[4px_4px_0px_#2C40A7] relative overflow-hidden">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#2C40A7]/70 block mb-1">
+                PENDING APPLICATIONS
+              </span>
+              <div className="text-3xl font-extrabold font-mono text-[#2C40A7]">
+                {pendingAppsCount}
+              </div>
+              <div className="mt-3 text-xs font-bold text-[#2C40A7]/80">
+                {pendingAppsCount > 0 ? 'Underwriting rule evaluating' : 'All applications processed'}
+              </div>
+              <div className="mt-3 h-1.5 w-full bg-[#FDE8F3] rounded-full overflow-hidden border border-[#2C40A7]">
+                <div className="h-full bg-[#2C40A7] w-2/3 rounded-full" />
+              </div>
+            </div>
+
           </div>
+        )}
 
-          {/* Stat 2: Active Loans */}
-          <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-5 shadow-[4px_4px_0px_#2C40A7] relative overflow-hidden">
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#2C40A7]/70 block mb-1">
-              ACTIVE LOANS
-            </span>
-            <div className="text-3xl font-extrabold font-mono text-[#2C40A7]">
-              {activeLoansCount}
-            </div>
-            <div className="mt-3 text-xs font-bold text-[#2C40A7]/80">
-              {activeLoansCount > 0 ? `${activeLoansCount} active repayment schedule` : 'No active loans'}
-            </div>
-            <div className="mt-3 h-1.5 w-full bg-[#EEF2FF] rounded-full overflow-hidden border border-[#2C40A7]">
-              <div className="h-full bg-[#2C40A7] w-1/2 rounded-full" />
-            </div>
-          </div>
-
-          {/* Stat 3: Outstanding Principal */}
-          <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-5 shadow-[4px_4px_0px_#2C40A7] relative overflow-hidden">
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#2C40A7]/70 block mb-1">
-              OUTSTANDING PRINCIPAL
-            </span>
-            <div className="text-3xl font-extrabold font-mono text-[#2C40A7]">
-              <Money cents={totalOutstandingCents} />
-            </div>
-            <div className="mt-3 text-xs font-bold text-[#2C40A7]/80">
-              {totalDisbursedCents > 0
-                ? `${Math.round(((totalDisbursedCents - totalOutstandingCents) / totalDisbursedCents) * 100)}% repaid so far`
-                : 'Zero balance'}
-            </div>
-            <div className="mt-3 h-1.5 w-full bg-[#FAF7F0] rounded-full overflow-hidden border border-[#2C40A7]">
-              <div
-                className="h-full bg-[#F237A1] rounded-full"
-                style={{
-                  width: `${totalDisbursedCents > 0 ? Math.round(((totalDisbursedCents - totalOutstandingCents) / totalDisbursedCents) * 100) : 0}%`,
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Stat 4: Pending Approvals */}
-          <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-5 shadow-[4px_4px_0px_#2C40A7] relative overflow-hidden">
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#2C40A7]/70 block mb-1">
-              PENDING APPLICATIONS
-            </span>
-            <div className="text-3xl font-extrabold font-mono text-[#2C40A7]">
-              {pendingAppsCount}
-            </div>
-            <div className="mt-3 text-xs font-bold text-[#2C40A7]/80">
-              {pendingAppsCount > 0 ? 'Underwriting rule evaluating' : 'All applications processed'}
-            </div>
-            <div className="mt-3 h-1.5 w-full bg-[#FDE8F3] rounded-full overflow-hidden border border-[#2C40A7]">
-              <div className="h-full bg-[#2C40A7] w-2/3 rounded-full" />
-            </div>
-          </div>
-
-        </div>
-
-        {/* Section: Your Applications */}
+        {/* Section: Your Applications (Shown on Overview or Applications tab) */}
         {(activeTab === 'overview' || activeTab === 'applications') && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -340,7 +349,7 @@ export function Dashboard() {
           </div>
         )}
 
-        {/* Section: Your Active Loans */}
+        {/* Section: Your Active Loans (Shown on Overview or Loans tab) */}
         {(activeTab === 'overview' || activeTab === 'loans') && (
           <div className="space-y-4 pt-4">
             <div className="flex items-center justify-between">
