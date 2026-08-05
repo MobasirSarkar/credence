@@ -5,22 +5,42 @@
  * See LICENSE at the root of this repository.
  */
 
+import { useCallback } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
 import type { ApplicationInput, ApplicationDTO } from '@lms/shared';
 
 export function useApplications() {
+  const fetchApplications = useCallback(
+    () => apiFetch<{ applications: ApplicationDTO[] }>('/api/applications'),
+    []
+  );
+
   return useQuery({
     queryKey: ['applications'],
-    queryFn: () => apiFetch<{ applications: ApplicationDTO[] }>('/api/applications'),
+    queryFn: fetchApplications,
+    staleTime: 10_000,
   });
 }
 
 export function useCreateApplication() {
   const qc = useQueryClient();
+
+  const createApplicationMutation = useCallback(
+    (input: ApplicationInput) =>
+      apiFetch<{ application: ApplicationDTO }>('/api/applications', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      }),
+    []
+  );
+
+  const handleSuccess = useCallback(() => {
+    qc.invalidateQueries({ queryKey: ['applications'] });
+  }, [qc]);
+
   return useMutation({
-    mutationFn: (input: ApplicationInput) =>
-      apiFetch<{ application: ApplicationDTO }>('/api/applications', { method: 'POST', body: JSON.stringify(input) }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['applications'] }),
+    mutationFn: createApplicationMutation,
+    onSuccess: handleSuccess,
   });
 }

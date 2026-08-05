@@ -5,6 +5,14 @@
   --font-display: 'Space Grotesk', sans-serif;
   --font-mono: 'Overpass Mono', monospace;
 
+  /* Riso Brand Utilities */
+  --color-brand-paper: #FAF7F0;
+  --color-brand-pink: #F237A1;
+  --color-brand-blue: #2C40A7;
+  --color-brand-pink-tint: #FDE8F3;
+  --color-brand-blue-tint: #EEF2FF;
+  --color-brand-card: #FFFDF8;
+
   --color-paper: #FAF7F0;
   --color-riso-pink: #F237A1;
   --color-riso-blue: #2C40A7;
