@@ -136,8 +136,8 @@ loan_applications
   created_at      text  not null
 
 loans                           -- exists only after disbursement
-  id              text  pk  (= application id)
-  application_id  text  fk loan_applications.id  unique
+  id              text  pk  -- equal to the originating loan_applications.id
+  application_id  text  fk loan_applications.id  unique  -- 1:1; id == application_id
   user_id         text  fk users.id
   principal_cents int   not null
   annual_rate_bps int   not null
@@ -234,8 +234,9 @@ GET    /api/admin/applications?status=pending
 POST   /api/admin/applications/:id/decision
                                  { decision: 'approve' | 'reject', reason? }
                                  -> 200 { application }            (admin only)
-POST   /api/admin/loans/:id/disburse
-                                 -> 200 { loan }                   (admin only)
+POST   /api/admin/applications/:id/disburse
+                                 -> 200 { loan }                   (admin only; creates loan + schedule)
+
 ```
 
 **Zod schemas** for every request body and response live in `packages/shared/src/index.ts` and are imported by both API (request validation) and web (form validation via `react-hook-form`'s zod resolver). One source of truth.
@@ -307,11 +308,9 @@ No retries, no global error boundary, no silent failures.
 
 ## 15. Seed data
 
-Two seed users created on first deploy and on `pnpm seed`:
-
 1. **Admin:** `admin@lms.dev` / `admin123` — role `admin`, monthly income 0.
-2. **Applicant A — fresh:** `alice@lms.dev` / `alice123` — role `applicant`, monthly income 100,000 cents-equivalent (₹100,000), no applications, no loans. Used in the walkthrough to demo the apply → approve → disburse path.
-3. **Applicant B — mid-flight:** `bob@lms.dev` / `bob123` — role `applicant`, monthly income 200,000 cents-equivalent (₹200,000), one approved+disbursed loan from 3 months ago, ~9 installments remaining with 3 already paid. Used to demo the schedule, "Pay EMI" button, and outstanding balance without first running through origination.
+2. **Applicant A — fresh:** `alice@lms.dev` / `alice123` — role `applicant`, monthly income 5,000,000 cents (₹50,000), no applications, no loans. Used in the walkthrough to demo the apply → approve → disburse path.
+3. **Applicant B — mid-flight:** `bob@lms.dev` / `bob123` — role `applicant`, monthly income 10,000,000 cents (₹100,000), one approved+disbursed loan (5,000,000 cents = ₹50,000, 12 months, 15% APR) that started 3 months ago, with 3 installments already paid and 9 remaining. Used to demo the schedule, "Pay EMI" button, and outstanding balance without first running through origination.
 
 Seed is idempotent — running `pnpm seed` twice produces the same state.
 
