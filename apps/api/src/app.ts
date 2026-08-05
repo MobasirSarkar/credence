@@ -8,6 +8,9 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import fastifyCookie from '@fastify/cookie';
 import fastifyJwt from '@fastify/jwt';
+import fastifyStatic from '@fastify/static';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { errorHandler } from './lib/errors.js';
 import { authRoutes } from './routes/auth.js';
 import { applicationRoutes } from './routes/applications.js';
@@ -36,5 +39,22 @@ export async function buildApp(): Promise<FastifyInstance> {
   await adminRoutes(app);
   await loanRoutes(app);
 
+  if (process.env.NODE_ENV === 'production') {
+    const webDist = path.resolve(fileURLToPath(import.meta.url), '../../web/dist');
+    await app.register(fastifyStatic, {
+      root: webDist,
+      prefix: '/',
+      wildcard: false,
+    });
+    app.setNotFoundHandler((req, reply) => {
+      if (req.url.startsWith('/api/')) {
+        reply.code(404).send({ error: 'NotFound' });
+        return;
+      }
+      reply.sendFile('index.html');
+    });
+  }
+
   return app;
 }
+

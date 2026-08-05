@@ -86,6 +86,6 @@ export async function seed() {
   console.log('seed: complete');
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   seed().catch((e) => { console.error(e); process.exit(1); });
 }

@@ -7,6 +7,11 @@
 
 import 'dotenv/config';
 import { buildApp } from './app.js';
+import { seed } from './db/seed.js';
+
+if (process.env.NODE_ENV === 'production') {
+  await seed();
+}
 
 const port = Number(process.env.PORT ?? 3000);
 const app = await buildApp();
