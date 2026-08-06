@@ -33,6 +33,9 @@ export async function buildApp(): Promise<FastifyInstance> {
     cookie: { cookieName: 'lms_session', signed: false },
   });
 
+  // Standard health checks
+  app.get('/health', async () => ({ status: 'ok' }));
+  app.get('/health/live', async () => ({ status: 'alive' }));
   app.get('/api/health', async () => ({ ok: true }));
   await authRoutes(app);
   await applicationRoutes(app);
@@ -47,7 +50,7 @@ export async function buildApp(): Promise<FastifyInstance> {
       wildcard: false,
     });
     app.setNotFoundHandler((req, reply) => {
-      if (req.url.startsWith('/api/')) {
+      if (req.url.startsWith('/api/') || req.url.startsWith('/health')) {
         reply.code(404).send({ error: 'NotFound' });
         return;
       }
