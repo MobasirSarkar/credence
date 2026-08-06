@@ -20,7 +20,7 @@ interface StepLoanDetailsProps {
   form: UseFormReturn<ApplicationInput>;
 }
 
-const FIELD_LABEL_CLS = 'text-xs font-mono font-bold uppercase tracking-wider text-[#2C40A7]';
+const FIELD_LABEL_CLS = 'text-xs font-mono font-bold uppercase tracking-wider text-brand-blue';
 
 export function StepLoanDetails({ form }: StepLoanDetailsProps) {
   return (
@@ -37,7 +37,7 @@ export function StepLoanDetails({ form }: StepLoanDetailsProps) {
               <div className="relative">
                 <span
                   aria-hidden="true"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 font-mono font-bold text-[#2C40A7]"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 font-mono font-bold text-brand-blue"
                 >
                   ₹
                 </span>

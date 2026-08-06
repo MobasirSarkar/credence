@@ -20,7 +20,7 @@ interface StepPurposeProps {
   form: UseFormReturn<ApplicationInput>;
 }
 
-const FIELD_LABEL_CLS = 'text-xs font-mono font-bold uppercase tracking-wider text-[#2C40A7]';
+const FIELD_LABEL_CLS = 'text-xs font-mono font-bold uppercase tracking-wider text-brand-blue';
 
 export function StepPurpose({ form }: StepPurposeProps) {
   return (

@@ -30,16 +30,16 @@ export function StepReview({ values }: StepReviewProps) {
   return (
     <section
       aria-labelledby="review-heading"
-      className="rounded-xl border-2 border-[#2C40A7] bg-[#FAF7F0] p-4 font-mono text-xs font-bold text-[#2C40A7]"
+      className="rounded-xl border-2 border-brand-blue bg-brand-paper p-4 font-mono text-xs font-bold text-brand-blue"
     >
       <h3 id="review-heading" className="sr-only">
         Application review
       </h3>
-      <dl className="divide-y divide-[#2C40A7]/20">
+      <dl className="divide-y divide-brand-blue/20">
         {rows.map((r) => (
           <div key={r.label} className="flex justify-between py-2">
-            <dt className="text-[#2C40A7]/70">{r.label.toUpperCase()}:</dt>
-            <dd className="text-[#2C40A7] text-sm">{r.value}</dd>
+            <dt className="text-brand-blue/70">{r.label.toUpperCase()}:</dt>
+            <dd className="text-brand-blue text-sm">{r.value}</dd>
           </div>
         ))}
       </dl>

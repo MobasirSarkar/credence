@@ -24,42 +24,42 @@ export function EmiSummary({
   return (
     <aside
       aria-label="Live loan estimate"
-      className="rounded-2xl border-2 border-[#2C40A7] bg-[#FDE8F3] p-6 shadow-[5px_5px_0px_#2C40A7] space-y-5 sticky top-24"
+      className="rounded-2xl border-2 border-brand-blue bg-brand-pink-tint p-6 riso-shadow-lg space-y-5 sticky top-24"
     >
-      <header className="flex items-center gap-2 border-b-2 border-[#2C40A7] pb-3">
-        <Calculator className="size-5 text-[#F237A1]" aria-hidden="true" />
-        <h3 className="font-extrabold text-base text-[#2C40A7]">Live Loan Estimate</h3>
+      <header className="flex items-center gap-2 border-b-2 border-brand-blue pb-3">
+        <Calculator className="size-5 text-brand-pink" aria-hidden="true" />
+        <h3 className="font-extrabold text-base text-brand-blue">Live Loan Estimate</h3>
       </header>
 
-      <dl className="space-y-3 font-mono text-xs font-bold text-[#2C40A7]">
-        <div className="bg-[#FFFDF8] p-4 rounded-xl border-2 border-[#2C40A7] shadow-[2px_2px_0px_#2C40A7]">
-          <dt className="text-[10px] text-[#2C40A7]/70 uppercase block mb-1">
+      <dl className="space-y-3 font-mono text-xs font-bold text-brand-blue">
+        <div className="bg-brand-card p-4 rounded-xl border-2 border-brand-blue riso-shadow-sm">
+          <dt className="text-[10px] text-brand-blue/70 uppercase block mb-1">
             Estimated Monthly EMI
           </dt>
-          <dd className="text-3xl font-extrabold text-[#F237A1]">
+          <dd className="text-3xl font-extrabold text-brand-pink">
             {formatINR(emiCents)}
-            <span className="text-xs font-normal text-[#2C40A7]/70"> / mo</span>
+            <span className="text-xs font-normal text-brand-blue/70"> / mo</span>
           </dd>
         </div>
 
-        <div className="bg-[#FFFDF8] p-3 rounded-lg border border-[#2C40A7]/40 space-y-1.5">
+        <div className="bg-brand-card p-3 rounded-lg border border-brand-blue/40 space-y-1.5">
           <div className="flex justify-between">
-            <dt className="text-[#2C40A7]/70">Principal:</dt>
+            <dt className="text-brand-blue/70">Principal:</dt>
             <dd>{formatINR(principalCents)}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-[#2C40A7]/70">Est. Total Interest:</dt>
+            <dt className="text-brand-blue/70">Est. Total Interest:</dt>
             <dd>{formatINR(totalInterestCents)}</dd>
           </div>
-          <div className="flex justify-between pt-1 border-t border-[#2C40A7]/20 text-[#2C40A7]">
+          <div className="flex justify-between pt-1 border-t border-brand-blue/20 text-brand-blue">
             <dt>Est. Total Payable:</dt>
             <dd>{formatINR(totalRepaymentCents)}</dd>
           </div>
         </div>
       </dl>
 
-      <p className="flex items-center gap-2 text-xs font-bold text-[#2C40A7]">
-        <ShieldCheck className="size-4 text-[#F237A1] shrink-0" aria-hidden="true" />
+      <p className="flex items-center gap-2 text-xs font-bold text-brand-blue">
+        <ShieldCheck className="size-4 text-brand-pink shrink-0" aria-hidden="true" />
         <span>Instant rule-based underwriting on submission</span>
       </p>
     </aside>

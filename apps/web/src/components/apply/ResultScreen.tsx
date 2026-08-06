@@ -43,15 +43,15 @@ export function ResultScreen({ result, onGoToDashboard, onStartNew }: ResultScre
   const copy = STATUS_COPY[result.status];
 
   return (
-    <main className="min-h-screen bg-[#FAF7F0] text-[#2C40A7] font-sans p-6 flex items-center justify-center">
+    <main className="min-h-screen bg-brand-paper text-brand-blue font-sans p-6 flex items-center justify-center">
       <article
         aria-live="polite"
-        className="max-w-lg w-full rounded-2xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-8 shadow-[6px_6px_0px_#2C40A7] text-center space-y-6"
+        className="max-w-lg w-full rounded-2xl border-2 border-brand-blue bg-brand-card p-8 riso-shadow-lg text-center space-y-6"
       >
         <div className="flex justify-center">
           <div
-            className={`size-16 rounded-2xl border-2 border-[#2C40A7] flex items-center justify-center shadow-[3px_3px_0px_#2C40A7] ${
-              isPositive ? 'bg-[#F237A1] text-white' : 'bg-destructive text-white'
+            className={`size-16 rounded-2xl border-2 border-brand-blue flex items-center justify-center riso-shadow-sm ${
+              isPositive ? 'bg-brand-pink text-primary-foreground' : 'bg-destructive text-destructive-foreground'
             }`}
           >
             {isPositive ? (
@@ -63,31 +63,31 @@ export function ResultScreen({ result, onGoToDashboard, onStartNew }: ResultScre
         </div>
 
         <header>
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#2C40A7]/70 block mb-1">
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-brand-blue/70 block mb-1">
             Application Status Result
           </span>
-          <h1 className="text-3xl font-extrabold text-[#2C40A7]">
+          <h1 className="text-3xl font-extrabold text-brand-blue">
             Application {result.status.toUpperCase()}
           </h1>
-          <p className="mt-2 text-sm text-[#2C40A7]/80 font-medium">
+          <p className="mt-2 text-sm text-brand-blue/80 font-medium">
             {result.reason ?? copy.help}
           </p>
         </header>
 
         {result.reason && !isPositive && (
-          <aside className="rounded-xl border-2 border-[#2C40A7] bg-[#FDE8F3] p-4 text-left font-mono text-xs font-bold text-[#2C40A7]">
-            <span className="text-[#F237A1] block mb-0.5">Underwriting Reason:</span>
+          <aside className="rounded-xl border-2 border-brand-blue bg-brand-pink-tint p-4 text-left font-mono text-xs font-bold text-brand-blue">
+            <span className="text-brand-pink block mb-0.5">Underwriting Reason:</span>
             {result.reason}
           </aside>
         )}
 
-        <footer className="pt-4 border-t-2 border-[#2C40A7]/20 flex flex-col sm:flex-row gap-3 justify-center">
+        <footer className="pt-4 border-t-2 border-brand-blue/20 flex flex-col sm:flex-row gap-3 justify-center">
           <Button size="lg" onClick={onGoToDashboard}>
             Go to Dashboard
             <ArrowRight className="size-4" aria-hidden="true" />
           </Button>
           <Button size="lg" variant="outline" onClick={onStartNew}>
-            <RefreshCw className="size-4 text-[#F237A1]" aria-hidden="true" />
+            <RefreshCw className="size-4 text-brand-pink" aria-hidden="true" />
             New Application
           </Button>
         </footer>

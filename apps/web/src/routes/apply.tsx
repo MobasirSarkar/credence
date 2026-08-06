@@ -80,7 +80,7 @@ export function Apply() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FAF7F0] text-[#2C40A7] font-sans selection:bg-[#F237A1] selection:text-white pb-20">
+    <main className="min-h-screen bg-brand-paper text-brand-blue font-sans selection:bg-brand-pink selection:text-primary-foreground pb-20">
       <ApplyHeader />
 
       <div className="mx-auto max-w-6xl px-6 pt-8 space-y-8">
@@ -94,7 +94,7 @@ export function Apply() {
           >
             <section
               aria-labelledby="form-heading"
-              className="lg:col-span-7 rounded-2xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-6 sm:p-8 shadow-[5px_5px_0px_#2C40A7] space-y-6"
+              className="lg:col-span-7 rounded-2xl border-2 border-brand-blue bg-brand-card p-6 sm:p-8 riso-shadow-lg space-y-6"
             >
               <h2 id="form-heading" className="sr-only">
                 Loan application form

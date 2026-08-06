@@ -19,7 +19,7 @@ interface StepControlsProps {
 export function StepControls({ step, isSubmitting, onBack, onNext }: StepControlsProps) {
   const isLast = step === 2;
   return (
-    <footer className="flex items-center justify-between pt-4 border-t-2 border-[#2C40A7]/20">
+    <footer className="flex items-center justify-between pt-4 border-t-2 border-brand-blue/20">
       <Button
         type="button"
         variant="outline"

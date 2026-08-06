@@ -7,33 +7,32 @@
 
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { StatusBadge } from '@/components/StatusBadge';
 
-interface ApplyHeaderProps {
-  backTo?: string;
+interface LoanDetailHeaderProps {
+  loanId: string;
+  status: string;
 }
 
-export function ApplyHeader({ backTo = '/dashboard' }: ApplyHeaderProps) {
+export function LoanDetailHeader({ loanId, status }: LoanDetailHeaderProps) {
   return (
     <header className="border-b-2 border-brand-blue bg-brand-paper sticky top-0 z-40">
       <nav
-        aria-label="Application navigation"
+        aria-label="Loan detail navigation"
         className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4"
       >
         <Link
-          to={backTo}
+          to="/dashboard"
           className="flex items-center gap-2 text-sm font-bold text-brand-blue hover:text-brand-pink transition-colors"
         >
           <ArrowLeft className="size-4 stroke-[2.5]" aria-hidden="true" />
           Back to Dashboard
         </Link>
-        <div className="flex items-center gap-2">
-          <span
-            aria-hidden="true"
-            className="flex size-7 items-center justify-center rounded bg-brand-pink text-primary-foreground text-xs font-bold border border-brand-blue"
-          >
-            LM
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-mono font-bold text-brand-blue/70">
+            LOAN #{loanId.slice(0, 8)}
           </span>
-          <span className="font-extrabold text-base text-brand-blue">Loan Wizard</span>
+          <StatusBadge status={status} />
         </div>
       </nav>
     </header>
