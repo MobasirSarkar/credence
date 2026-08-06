@@ -1,0 +1,15 @@
+services:
+  lms:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - lms_data:/app/apps/api/data
+    restart: unless-stopped
+
+volumes:
+  lms_data:

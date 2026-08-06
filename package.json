@@ -19,5 +19,13 @@
     "puppeteer": "^23.0.0",
     "typescript": "^5.5.0"
   },
-  "packageManager": "pnpm@9.6.0"
+  "packageManager": "pnpm@11.20.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "bcrypt",
+      "better-sqlite3",
+      "esbuild",
+      "puppeteer"
+    ]
+  }
 }
