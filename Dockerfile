@@ -48,6 +48,7 @@ USER node
 # Copy built artifacts and start script
 COPY --chown=node:node --from=builder /app/tools tools/
 COPY --chown=node:node --from=builder /app/apps/api/dist apps/api/dist/
+COPY --chown=node:node --from=builder /app/apps/api/drizzle apps/api/drizzle/
 COPY --chown=node:node --from=builder /app/apps/web/dist apps/web/dist/
 COPY --chown=node:node --from=builder /app/packages/shared packages/shared/
 
