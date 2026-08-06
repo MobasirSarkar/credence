@@ -4,8 +4,8 @@ FROM node:lts-alpine AS builder
 WORKDIR /app
 # Install build tools for native modules (SQLite) and latest pnpm
 RUN apk add --no-cache python3 make g++ && npm install -g pnpm@latest
-
-# Skip puppeteer chromium download in CI/Docker
+# Set CI mode and skip puppeteer chromium download
+ENV CI=true
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 
 # Copy package management files

@@ -1,0 +1,30 @@
+node_modules
+apps/*/node_modules
+packages/*/node_modules
+.pnpm-store
+
+# Build outputs
+dist
+apps/*/dist
+packages/*/dist
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Database files
+*.sqlite
+*.sqlite-journal
+*.db
+apps/*/data
+
+# Logs and debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
