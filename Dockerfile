@@ -12,6 +12,7 @@ ENV PUPPETEER_SKIP_DOWNLOAD=true
 COPY pnpm-lock.yaml package.json pnpm-workspace.yaml ./
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
+COPY packages/shared/package.json packages/shared/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
@@ -29,10 +30,12 @@ WORKDIR /app
 RUN apk add --no-cache python3 make g++ && \
     npm install -g pnpm@latest && \
     chown -R node:node /app
+
 # Copy package files for prod install (chowned to node)
 COPY --chown=node:node --from=builder /app/package.json /app/pnpm-workspace.yaml /app/pnpm-lock.yaml ./
 COPY --chown=node:node --from=builder /app/apps/api/package.json apps/api/
 COPY --chown=node:node --from=builder /app/apps/web/package.json apps/web/
+COPY --chown=node:node --from=builder /app/packages/shared/package.json packages/shared/
 
 # Skip puppeteer, run install AS NODE USER, then cleanup build tools AS ROOT
 ENV PUPPETEER_SKIP_DOWNLOAD=true
@@ -46,6 +49,7 @@ USER node
 COPY --chown=node:node --from=builder /app/tools tools/
 COPY --chown=node:node --from=builder /app/apps/api/dist apps/api/dist/
 COPY --chown=node:node --from=builder /app/apps/web/dist apps/web/dist/
+COPY --chown=node:node --from=builder /app/packages/shared packages/shared/
 
 # Create data directory for SQLite
 RUN mkdir -p apps/api/data
