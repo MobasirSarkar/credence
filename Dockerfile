@@ -1,9 +1,9 @@
 # Stage 1: Build
-FROM node:lts-alpine AS builder
+FROM node:22-slim AS builder
 
 WORKDIR /app
-# Install build tools for native modules (SQLite) and latest pnpm
-RUN apk add --no-cache python3 make g++ && npm install -g pnpm@latest
+# Install latest pnpm (no C++ build tools needed on Debian slim due to prebuilt binaries)
+RUN npm install -g pnpm@latest
 # Set CI mode and skip puppeteer chromium download
 ENV CI=true
 ENV PUPPETEER_SKIP_DOWNLOAD=true
@@ -22,13 +22,12 @@ COPY . .
 RUN pnpm build
 
 # Stage 2: Runner
-FROM node:lts-alpine
+FROM node:22-slim
 
 WORKDIR /app
 
-# Install latest pnpm as root, prep directory, install build tools for native compile
-RUN apk add --no-cache python3 make g++ && \
-    npm install -g pnpm@latest && \
+# Install latest pnpm and prep directory
+RUN npm install -g pnpm@latest && \
     chown -R node:node /app
 
 # Copy package files for prod install (chowned to node)
@@ -37,10 +36,9 @@ COPY --chown=node:node --from=builder /app/apps/api/package.json apps/api/
 COPY --chown=node:node --from=builder /app/apps/web/package.json apps/web/
 COPY --chown=node:node --from=builder /app/packages/shared/package.json packages/shared/
 
-# Skip puppeteer, run install AS NODE USER, cleanup build tools AS ROOT, then nuke pnpm cache
+# Skip puppeteer, run install AS NODE USER, then nuke pnpm cache
 ENV PUPPETEER_SKIP_DOWNLOAD=true
-RUN su node -c "pnpm install --prod --frozen-lockfile && rm -rf ~/.local/share/pnpm/store /home/node/.local/share/pnpm/store" && \
-    apk del python3 make g++
+RUN su node -c "pnpm install --prod --frozen-lockfile && rm -rf ~/.local/share/pnpm/store /home/node/.local/share/pnpm/store"
 
 # Switch to non-root user permanently for all remaining operations and runtime
 USER node
