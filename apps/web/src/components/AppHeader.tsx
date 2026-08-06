@@ -65,8 +65,8 @@ export function AppHeader({
             </div>
           )}
           {user?.role === 'admin' && (
-            <Button size="sm" variant="secondary" render={<Link to="/admin" />}>
-              Admin Queue
+            <Button size="sm" variant="secondary" render={<Link to="/admin/review" />}>
+              Underwriting Review
             </Button>
           )}
           {onApply && (

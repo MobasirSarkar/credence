@@ -23,8 +23,8 @@ export function CallToAction() {
           Experience the entire lending journey in under 2 minutes.
         </h2>
         <p className="mt-4 text-base text-primary-foreground/80 max-w-xl mx-auto font-medium">
-          Sign up as a new borrower or log in as our seeded admin to test the approval queue and
-          loan disbursement flow live.
+          Sign up as a new borrower or log in as our seeded underwriter to test the underwriting
+          review and loan disbursement flow live.
         </p>
         <div className="mt-8 flex justify-center gap-4 flex-wrap">
           <Button

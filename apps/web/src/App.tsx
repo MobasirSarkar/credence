@@ -15,8 +15,8 @@ import { Login } from '@/routes/login';
 import { Signup } from '@/routes/signup';
 import { Dashboard } from '@/routes/dashboard';
 import { LoanDetail } from '@/routes/loan-detail';
-import { AdminQueue } from '@/routes/admin/queue';
-import { AdminApplicationDetail } from '@/routes/admin/application-detail';
+import { UnderwritingReview } from '@/routes/admin/underwriting-review';
+import { ApplicationReview } from '@/routes/admin/application-review';
 import { Apply } from '@/routes/apply';
 import { SESSION_EXPIRED_EVENT } from '@/lib/api';
 
@@ -53,8 +53,8 @@ export default function App() {
         <Route path="/apply" element={<AuthGuard><Apply /></AuthGuard>} />
         <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
         <Route path="/loans/:id" element={<AuthGuard><LoanDetail /></AuthGuard>} />
-        <Route path="/admin" element={<AuthGuard admin><AdminQueue /></AuthGuard>} />
-        <Route path="/admin/applications/:id" element={<AuthGuard admin><AdminApplicationDetail /></AuthGuard>} />
+        <Route path="/admin/review" element={<AuthGuard admin><UnderwritingReview /></AuthGuard>} />
+        <Route path="/admin/review/:id" element={<AuthGuard admin><ApplicationReview /></AuthGuard>} />
       </Routes>
     </BrowserRouter>
   );

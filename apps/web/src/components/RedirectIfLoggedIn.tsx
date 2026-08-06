@@ -15,7 +15,7 @@ export function RedirectIfLoggedIn() {
   const nav = useNavigate();
   useEffect(() => {
     if (!isLoading && data?.user) {
-      nav(data.user.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
+      nav(data.user.role === 'admin' ? '/admin/review' : '/dashboard', { replace: true });
     }
   }, [data, isLoading, nav]);
   return null;

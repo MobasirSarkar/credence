@@ -27,7 +27,7 @@ export function useLogin() {
       markSessionAlive();
       qc.setQueryData(['me'], data);
       clearUserData(qc);
-      nav(data.user.role === 'admin' ? '/admin' : '/dashboard');
+      nav(data.user.role === 'admin' ? '/admin/review' : '/dashboard');
     },
   });
 }
