@@ -8,7 +8,7 @@
 import { Link } from 'react-router-dom';
 import { LogOut, Plus, Search, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { BrandLogo } from '@/components/BrandLogo';
+import { BrandLogo } from '../brand-logo/BrandLogo';
 
 type AppHeaderUser = {
   fullName: string;
@@ -71,7 +71,7 @@ export function AppHeader({
           )}
           {onApply && (
             <Button size="sm" onClick={onApply}>
-              <Plus className="size-4 stroke-[3]" />
+              <Plus className="size-4 stroke-3" />
               Apply for Loan
             </Button>
           )}

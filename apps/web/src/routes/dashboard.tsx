@@ -6,7 +6,7 @@
  */
 
 import { useDashboardView, type DashboardTab } from '@/hooks/useDashboardView';
-import { AppHeader } from '@/components/AppHeader';
+import { AppHeader } from '@/components/app-header/AppHeader';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardTabs } from '@/components/dashboard/DashboardTabs';
 import { PortfolioOverview } from '@/components/dashboard/PortfolioOverview';

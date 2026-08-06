@@ -6,8 +6,8 @@
  */
 
 import { ArrowRight, FileText } from 'lucide-react';
-import { EmptyState } from '@/components/EmptyState';
-import { SectionHeader } from '@/components/SectionHeader';
+import { EmptyState } from '@/components/empty-state/EmptyState';
+import { SectionHeader } from '@/components/section-header/SectionHeader';
 import { Button } from '@/components/ui/button';
 import { ApplicationCard } from './ApplicationCard';
 import type { ApplicationDTO } from '@lms/shared';

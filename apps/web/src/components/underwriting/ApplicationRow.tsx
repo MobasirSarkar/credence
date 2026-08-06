@@ -7,7 +7,7 @@
 
 import { ArrowRight, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Money } from '@/components/Money';
+import { Money } from '@/components/money/Money';
 import { formatDate } from '@/lib/format';
 import { TableCell, TableRow } from '@/components/ui/table';
 import type { UnderwritingApplication } from '@/hooks/useUnderwritingReview';

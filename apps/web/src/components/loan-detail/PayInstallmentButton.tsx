@@ -7,7 +7,7 @@
 
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Money } from '@/components/Money';
+import { Money } from '@/components/money/Money';
 
 interface PayInstallmentButtonProps {
   isPending: boolean;

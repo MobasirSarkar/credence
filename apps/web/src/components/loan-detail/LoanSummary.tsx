@@ -5,8 +5,8 @@
  * See LICENSE at the root of this repository.
  */
 
-import { Money } from '@/components/Money';
-import { ProgressBar } from '@/components/ProgressBar';
+import { Money } from '@/components/money/Money';
+import { ProgressBar } from '@/components/progress-bar/ProgressBar';
 import { formatDate } from '@/lib/format';
 
 interface LoanSummaryProps {

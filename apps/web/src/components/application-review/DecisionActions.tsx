@@ -42,7 +42,7 @@ export function DecisionActions({
           {isSubmitting ? (
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           ) : (
-            <Check className="size-4 stroke-[3]" aria-hidden="true" />
+            <Check className="size-4 stroke-3" aria-hidden="true" />
           )}
           Approve Application
         </Button>
@@ -50,7 +50,7 @@ export function DecisionActions({
           {isSubmitting ? (
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           ) : (
-            <X className="size-4 stroke-[3]" aria-hidden="true" />
+            <X className="size-4 stroke-3" aria-hidden="true" />
           )}
           Reject Application
         </Button>

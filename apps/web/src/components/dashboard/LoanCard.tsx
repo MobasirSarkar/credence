@@ -9,9 +9,9 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { StatusBadge } from '@/components/StatusBadge';
-import { Money } from '@/components/Money';
-import { ProgressBar } from '@/components/ProgressBar';
+import { StatusBadge } from '@/components/status-badge/StatusBadge';
+import { Money } from '@/components/money/Money';
+import { ProgressBar } from '@/components/progress-bar/ProgressBar';
 import { formatDate } from '@/lib/format';
 import type { LoanDTO } from '@lms/shared';
 

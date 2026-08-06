@@ -15,8 +15,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { ArrowLeft, Loader2, ArrowRight } from 'lucide-react';
-import { RedirectIfLoggedIn } from '@/components/RedirectIfLoggedIn';
-import { BrandLogo } from '@/components/BrandLogo';
+import { BrandLogo } from '@/components/brand-logo/BrandLogo';
+import { RedirectIfLoggedIn } from '@/components/redirect-if-logged-in/RedirectIfLoggedIn';
 
 export function Signup() {
   const form = useForm<SignupInputT>({

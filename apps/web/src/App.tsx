@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
-import { AuthGuard } from '@/components/AuthGuard';
+
 import { Landing } from '@/routes/landing';
 import { Login } from '@/routes/login';
 import { Signup } from '@/routes/signup';
@@ -19,6 +19,7 @@ import { UnderwritingReview } from '@/routes/admin/underwriting-review';
 import { ApplicationReview } from '@/routes/admin/application-review';
 import { Apply } from '@/routes/apply';
 import { SESSION_EXPIRED_EVENT } from '@/lib/api';
+import { AuthGuard } from './components/auth-guard/AuthGuard';
 
 const PUBLIC_PATHS = ['/', '/login', '/signup'];
 

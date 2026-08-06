@@ -6,8 +6,8 @@
  */
 
 import { TrendingUp } from 'lucide-react';
-import { StatCard } from '@/components/StatCard';
-import { Money } from '@/components/Money';
+import { StatCard } from '@/components/stat-card/StatCard';
+import { Money } from '@/components/money/Money';
 import { formatINR } from '@/lib/format';
 import type { DashboardTotals } from '@/hooks/useDashboardView';
 

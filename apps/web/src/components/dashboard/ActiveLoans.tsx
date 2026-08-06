@@ -6,8 +6,8 @@
  */
 
 import { Receipt, Wallet } from 'lucide-react';
-import { EmptyState } from '@/components/EmptyState';
-import { SectionHeader } from '@/components/SectionHeader';
+import { EmptyState } from '@/components/empty-state/EmptyState';
+import { SectionHeader } from '@/components/section-header/SectionHeader';
 import { LoanCard } from './LoanCard';
 import type { LoanDTO } from '@lms/shared';
 

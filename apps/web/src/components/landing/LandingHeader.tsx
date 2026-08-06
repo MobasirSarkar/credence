@@ -7,7 +7,7 @@
 
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { BrandLogo } from '@/components/BrandLogo';
+import { BrandLogo } from '@/components/brand-logo/BrandLogo';
 import { Button } from '@/components/ui/button';
 
 const NAV_LINKS = [

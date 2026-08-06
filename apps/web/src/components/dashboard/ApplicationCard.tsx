@@ -8,8 +8,8 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { StatusBadge } from '@/components/StatusBadge';
-import { Money } from '@/components/Money';
+import { StatusBadge } from '@/components/status-badge/StatusBadge';
+import { Money } from '@/components/money/Money';
 import { formatDate } from '@/lib/format';
 import type { ApplicationDTO } from '@lms/shared';
 

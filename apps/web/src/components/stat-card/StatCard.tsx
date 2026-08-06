@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { ProgressBar } from '@/components/ProgressBar';
+import { ProgressBar } from '../progress-bar/ProgressBar';
 
 type StatCardProps = {
   label: string;

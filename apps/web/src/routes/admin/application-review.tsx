@@ -7,7 +7,7 @@
 
 import { useParams } from 'react-router-dom';
 import { useApplicationReview } from '@/hooks/useApplicationReview';
-import { LoadingScreen } from '@/components/LoadingScreen';
+import { LoadingScreen } from '@/components/loading-screen/LoadingScreen';
 import { ApplicationReviewHeader } from '@/components/application-review/ApplicationReviewHeader';
 import { ApplicationSummary } from '@/components/application-review/ApplicationSummary';
 import { RuleRecommendation } from '@/components/application-review/RuleRecommendation';

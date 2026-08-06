@@ -6,7 +6,7 @@
  */
 
 import { useUnderwritingReview } from '@/hooks/useUnderwritingReview';
-import { LoadingState } from '@/components/LoadingScreen';
+import { LoadingState } from '@/components/loading-screen/LoadingScreen';
 import { UnderwritingHeader } from '@/components/underwriting/UnderwritingHeader';
 import { UnderwritingPageHeader } from '@/components/underwriting/UnderwritingPageHeader';
 import { UnderwritingTable } from '@/components/underwriting/UnderwritingTable';

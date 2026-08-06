@@ -5,7 +5,7 @@
  * See LICENSE at the root of this repository.
  */
 
-import { BrandLogo } from '@/components/BrandLogo';
+import { BrandLogo } from '@/components/brand-logo/BrandLogo';
 
 export function LandingFooter() {
   return (

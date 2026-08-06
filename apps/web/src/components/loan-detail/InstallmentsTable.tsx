@@ -7,9 +7,9 @@
 
 import { Check, Receipt } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Money } from '@/components/Money';
+import { Money } from '@/components/money/Money';
 import { formatDate } from '@/lib/format';
-import { SectionHeader } from '@/components/SectionHeader';
+import { SectionHeader } from '@/components/section-header/SectionHeader';
 import { PayInstallmentButton } from './PayInstallmentButton';
 import type { InstallmentDTO } from '@lms/shared';
 
