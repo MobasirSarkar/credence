@@ -2,7 +2,8 @@
 FROM node:22-slim AS builder
 
 WORKDIR /app
-# Install latest pnpm (no C++ build tools needed on Debian slim due to prebuilt binaries)
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+# Install latest pnpm
 RUN npm install -g pnpm@latest
 # Set CI mode and skip puppeteer chromium download
 ENV CI=true
@@ -27,7 +28,7 @@ FROM node:22-slim
 WORKDIR /app
 
 # Install latest pnpm and prep directory
-RUN npm install -g pnpm@latest && \
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/* && npm install -g pnpm@latest && \
     chown -R node:node /app
 
 # Copy package files for prod install (chowned to node)
@@ -39,6 +40,9 @@ COPY --chown=node:node --from=builder /app/packages/shared/package.json packages
 # Skip puppeteer, run install AS NODE USER, then nuke pnpm cache
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 RUN su node -c "pnpm install --prod --frozen-lockfile && rm -rf ~/.local/share/pnpm/store /home/node/.local/share/pnpm/store"
+
+# Clean up build tools to keep image small
+RUN apt-get remove -y python3 make g++ && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
 # Switch to non-root user permanently for all remaining operations and runtime
 USER node
