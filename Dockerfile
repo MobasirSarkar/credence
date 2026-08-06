@@ -37,9 +37,9 @@ COPY --chown=node:node --from=builder /app/apps/api/package.json apps/api/
 COPY --chown=node:node --from=builder /app/apps/web/package.json apps/web/
 COPY --chown=node:node --from=builder /app/packages/shared/package.json packages/shared/
 
-# Skip puppeteer, run install AS NODE USER, then cleanup build tools AS ROOT
+# Skip puppeteer, run install AS NODE USER, cleanup build tools AS ROOT, then nuke pnpm cache
 ENV PUPPETEER_SKIP_DOWNLOAD=true
-RUN su node -c "pnpm install --prod --frozen-lockfile" && \
+RUN su node -c "pnpm install --prod --frozen-lockfile && rm -rf ~/.local/share/pnpm/store /home/node/.local/share/pnpm/store" && \
     apk del python3 make g++
 
 # Switch to non-root user permanently for all remaining operations and runtime
@@ -50,7 +50,10 @@ COPY --chown=node:node --from=builder /app/tools tools/
 COPY --chown=node:node --from=builder /app/apps/api/dist apps/api/dist/
 COPY --chown=node:node --from=builder /app/apps/api/drizzle apps/api/drizzle/
 COPY --chown=node:node --from=builder /app/apps/web/dist apps/web/dist/
-COPY --chown=node:node --from=builder /app/packages/shared packages/shared/
+
+# Copy shared source explicitly avoiding node_modules from builder
+COPY --chown=node:node --from=builder /app/packages/shared/src packages/shared/src/
+COPY --chown=node:node --from=builder /app/packages/shared/tsconfig.json packages/shared/
 
 # Create data directory for SQLite
 RUN mkdir -p apps/api/data
