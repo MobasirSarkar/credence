@@ -24,7 +24,7 @@ export function EmiSummary({
   return (
     <aside
       aria-label="Live loan estimate"
-      className="rounded-2xl border-2 border-brand-blue bg-brand-pink-tint p-6 riso-shadow-lg space-y-5 sticky top-24"
+      className="lg:col-span-5 rounded-2xl border-2 border-brand-blue bg-brand-pink-tint p-6 riso-shadow-lg space-y-5 sticky top-24"
     >
       <header className="flex items-center gap-2 border-b-2 border-brand-blue pb-3">
         <Calculator className="size-5 text-brand-pink" aria-hidden="true" />
