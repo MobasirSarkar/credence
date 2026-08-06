@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2026 Mobasher Ali (https://github.com/mobas)
+ * Copyright (c) 2026 ABDUL MOBASIR SARKAR (https://github.com/MobasirSarkar)
  * All Rights Reserved.
  *
  * See LICENSE at the root of this repository.
  */
 
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyReply } from 'fastify';
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { LoginInput, SignupInput, type UserDTO } from '@lms/shared';
@@ -14,9 +14,16 @@ import { getDb, resetDb } from '../db/client.js';
 import { users } from '../db/schema.js';
 import {
   hashPassword, verifyPassword,
-  setSessionCookie, clearSessionCookie, readSessionCookie,
-  requireAuth, toUserDTO,
+  setAccessCookie, setRefreshCookie, clearAuthCookies,
+  requireAuth, requireRefresh, toUserDTO, type SessionUser,
 } from '../lib/auth.js';
+
+async function issueSession(reply: FastifyReply, payload: SessionUser) {
+  const access = await reply.jwtSign(payload, { expiresIn: '1h' });
+  const refresh = await reply.jwtSign(payload, { expiresIn: '30d' });
+  setAccessCookie(reply, access);
+  setRefreshCookie(reply, refresh);
+}
 
 export async function authRoutes(app: FastifyInstance) {
   const db = getDb();
@@ -36,8 +43,7 @@ export async function authRoutes(app: FastifyInstance) {
       monthlyIncome: input.monthlyIncome,
       createdAt: new Date().toISOString(),
     }).run();
-    const token = await reply.jwtSign({ id, role: 'applicant' });
-    setSessionCookie(reply, token);
+    await issueSession(reply, { id, role: 'applicant' });
     const user: UserDTO = { id, email: input.email, fullName: input.fullName, role: 'applicant', monthlyIncome: input.monthlyIncome };
     return reply.code(201).send({ user });
   });
@@ -49,14 +55,22 @@ export async function authRoutes(app: FastifyInstance) {
     if (!user) throw new UnauthorizedError('Invalid credentials');
     const ok = await verifyPassword(input.password, user.passwordHash);
     if (!ok) throw new UnauthorizedError('Invalid credentials');
-    const token = await reply.jwtSign({ id: user.id, role: user.role });
-    setSessionCookie(reply, token);
+    await issueSession(reply, { id: user.id, role: user.role });
     return reply.send({ user: toUserDTO(user) });
   });
 
   app.post('/api/auth/logout', async (_req, reply) => {
-    clearSessionCookie(reply);
+    clearAuthCookies(reply);
     return reply.code(204).send();
+  });
+
+  app.post('/api/auth/refresh', async (req, reply) => {
+    const session = await requireRefresh(req);
+    const rows = db.select().from(users).where(eq(users.id, session.id)).all();
+    const user = rows[0];
+    if (!user) throw new UnauthorizedError('User missing');
+    await issueSession(reply, { id: user.id, role: user.role });
+    return reply.send({ user: toUserDTO(user) });
   });
 
   app.get('/api/auth/me', async (req, reply) => {

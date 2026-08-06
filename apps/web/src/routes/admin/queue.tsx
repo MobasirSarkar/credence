@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Mobasher Ali (https://github.com/mobas)
+ * Copyright (c) 2026 ABDUL MOBASIR SARKAR (https://github.com/MobasirSarkar)
  * All Rights Reserved.
  *
  * See LICENSE at the root of this repository.
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Money } from '@/components/Money';
 import { formatDate } from '@/lib/format';
+import { LoadingState } from '@/components/LoadingScreen';
 import { ArrowLeft, CircleAlert, FileText, Loader2, ShieldCheck, ArrowRight, User } from 'lucide-react';
 
 export function AdminQueue() {
@@ -64,10 +65,7 @@ export function AdminQueue() {
         </div>
 
         {q.isLoading ? (
-          <div className="p-12 text-center font-mono text-xs font-bold">
-            <Loader2 className="size-8 animate-spin text-[#F237A1] mx-auto mb-2" />
-            Fetching pending queue...
-          </div>
+          <LoadingState text="Fetching pending queue..." />
         ) : q.error || !q.data ? (
           <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-8 text-center shadow-[4px_4px_0px_#2C40A7]">
             <CircleAlert className="size-10 text-[#DC2626] mx-auto mb-2" />

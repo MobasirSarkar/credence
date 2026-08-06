@@ -17,7 +17,7 @@ Then open <http://localhost:5173> (web) and <http://localhost:3000/api/health> (
 
 | Email             | Password   | Role       | Notes                                    |
 |-------------------|------------|------------|------------------------------------------|
-| admin@lms.dev     | admin123   | admin      | Underwriter view                         |
+| mobasir@gmail.com | moba9811   | admin      | Underwriter view                         |
 | alice@lms.dev     | alice123   | applicant  | No loans — fresh applicant               |
 | bob@lms.dev       | bob123     | applicant  | Mid-flight loan (3 of 12 paid)           |
 
@@ -25,7 +25,7 @@ Then open <http://localhost:5173> (web) and <http://localhost:3000/api/health> (
 
 1. Open `/`, sign up as a new applicant.
 2. Apply: amount ₹50,000, term 12 months, rate 15%. Submit.
-3. Open a second tab, sign in as `admin@lms.dev`.
+3. Open a second tab, sign in as `mobasir@gmail.com`.
 4. Review the application → Approve → Disburse.
 5. Back on the applicant tab, open the new loan → Pay EMI.
 
@@ -41,7 +41,7 @@ Then open <http://localhost:5173> (web) and <http://localhost:3000/api/health> (
 
 ## Architecture
 
-See [docs/superpowers/hld/2026-08-05-los-lms-prototype.md](docs/superpowers/hld/2026-08-05-los-lms-prototype.md) for the HLD, [docs/superpowers/lld/2026-08-05-los-lms-prototype.md](docs/superpowers/lld/2026-08-05-los-lms-prototype.md) for the LLD, and [docs/superpowers/plans/2026-08-05-los-lms-prototype.md](docs/superpowers/plans/2026-08-05-los-lms-prototype.md) for the implementation plan.
+See [docs/hld/hld.md](docs/hld/hld.md) for the HLD and [docs/lld/lld.md](docs/lld/lld.md) for the LLD.
 
 ## Deploy to Render
 

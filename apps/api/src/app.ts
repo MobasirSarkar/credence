@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Mobasher Ali (https://github.com/mobas)
+ * Copyright (c) 2026 ABDUL MOBASIR SARKAR (https://github.com/MobasirSarkar)
  * All Rights Reserved.
  *
  * See LICENSE at the root of this repository.
@@ -40,7 +40,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await loanRoutes(app);
 
   if (process.env.NODE_ENV === 'production') {
-    const webDist = path.resolve(fileURLToPath(import.meta.url), '../../web/dist');
+    const webDist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../web/dist');
     await app.register(fastifyStatic, {
       root: webDist,
       prefix: '/',

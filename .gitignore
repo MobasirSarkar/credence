@@ -9,3 +9,4 @@ apps/*/.vite/
 apps/*/test/*.js
 apps/*/test/*.js.map
 apps/api/data/
+.superpowers\sdd\*

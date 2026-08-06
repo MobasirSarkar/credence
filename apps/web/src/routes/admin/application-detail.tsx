@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Mobasher Ali (https://github.com/mobas)
+ * Copyright (c) 2026 ABDUL MOBASIR SARKAR (https://github.com/MobasirSarkar)
  * All Rights Reserved.
  *
  * See LICENSE at the root of this repository.
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Money } from '@/components/Money';
 import { StatusBadge } from '@/components/StatusBadge';
+import { LoadingScreen } from '@/components/LoadingScreen';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
@@ -33,12 +34,7 @@ export function AdminApplicationDetail() {
   const [reason, setReason] = useState('');
 
   if (q.isLoading) {
-    return (
-      <main className="min-h-screen bg-[#FAF7F0] text-[#2C40A7] p-6 flex flex-col items-center justify-center">
-        <Loader2 className="size-8 animate-spin text-[#F237A1] mb-2" />
-        <span className="font-mono text-xs font-bold uppercase tracking-wider">Loading Application...</span>
-      </main>
-    );
+    return <LoadingScreen text="Loading Application..." />;
   }
 
   if (q.error || !q.data) {

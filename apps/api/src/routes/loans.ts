@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Mobasher Ali (https://github.com/mobas)
+ * Copyright (c) 2026 ABDUL MOBASIR SARKAR (https://github.com/MobasirSarkar)
  * All Rights Reserved.
  *
  * See LICENSE at the root of this repository.

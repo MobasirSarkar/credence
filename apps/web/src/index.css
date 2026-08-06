@@ -122,4 +122,9 @@
     color: #2C40A7;
     font-weight: 700;
   }
+
+  @keyframes progress {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+  }
 }

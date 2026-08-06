@@ -1,12 +1,6 @@
-/*
- * Copyright (c) 2026 Mobasher Ali (https://github.com/mobas)
- * All Rights Reserved.
- *
- * See LICENSE at the root of this repository.
- */
-
 import type { FastifyError, FastifyReply, FastifyRequest } from 'fastify';
 import { ZodError } from 'zod';
+import fs from 'node:fs';
 
 export abstract class AppError extends Error {
   abstract readonly status: number;
@@ -49,6 +43,7 @@ export function errorHandler(
     reply.code(err.status).send({ error: err.code, message: err.message });
     return;
   }
+  fs.appendFileSync('error.log', err.stack + '\n');
   req.log.error(err);
   reply.code(500).send({ error: 'InternalError' });
 }

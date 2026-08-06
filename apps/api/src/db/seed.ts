@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Mobasher Ali (https://github.com/mobas)
+ * Copyright (c) 2026 ABDUL MOBASIR SARKAR (https://github.com/MobasirSarkar)
  * All Rights Reserved.
  *
  * See LICENSE at the root of this repository.
@@ -34,11 +34,11 @@ export async function seed() {
   const sqlite = getSqlite();
 
   // Hash passwords
-  const adminHash = await hashPassword('admin123');
+  const adminHash = await hashPassword('moba9811');
   const aliceHash = await hashPassword('alice123');
   const bobHash = await hashPassword('bob123');
 
-  const adminId = upsertUser('admin@lms.dev', 'Admin', 'admin', 0, 'admin123');
+  const adminId = upsertUser('mobasir@gmail.com', 'Admin', 'admin', 0, 'moba9811');
   const aliceId = upsertUser('alice@lms.dev', 'Alice Applicant', 'applicant', 5_000_000, 'alice123');
   const bobId = upsertUser('bob@lms.dev', 'Bob Borrower', 'applicant', 10_000_000, 'bob123');
 

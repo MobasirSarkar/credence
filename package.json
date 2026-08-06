@@ -5,11 +5,14 @@
   "scripts": {
     "dev": "pnpm -r --parallel run dev",
     "build": "pnpm -r run build",
+    "build:web": "pnpm --filter @lms/web build",
+    "build:api": "pnpm --filter @lms/api build",
     "seed": "pnpm --filter @lms/api run seed",
     "test": "pnpm --filter @lms/api test",
     "start": "pnpm --filter @lms/api start",
+    "start:prod": "pnpm -r run build && node tools/start-prod.mjs",
     "typecheck": "pnpm -r run typecheck",
-    "pdf": "node tools/render-pdf.mjs"
+    "pdf": "node tools/generate-pdf.mjs"
   },
   "devDependencies": {
     "marked": "^12.0.2",

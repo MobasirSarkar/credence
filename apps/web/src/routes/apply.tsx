@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Mobasher Ali (https://github.com/mobas)
+ * Copyright (c) 2026 ABDUL MOBASIR SARKAR (https://github.com/MobasirSarkar)
  * All Rights Reserved.
  *
  * See LICENSE at the root of this repository.
@@ -79,9 +79,14 @@ export function Apply() {
     () => calculateEmiCents(currentAmount, currentTerm, currentRate),
     [currentAmount, currentTerm, currentRate]
   );
-
-  const totalRepaymentCents = estimatedEmiCents * currentTerm;
-  const totalInterestCents = Math.max(0, totalRepaymentCents - currentAmount);
+  const totalRepaymentCents = useMemo(
+    () => estimatedEmiCents * currentTerm,
+    [estimatedEmiCents, currentTerm]
+  );
+  const totalInterestCents = useMemo(
+    () => Math.max(0, totalRepaymentCents - currentAmount),
+    [totalRepaymentCents, currentAmount]
+  );
 
   // Result Screen (Approved / Pending / Rejected)
   if (result) {
@@ -89,12 +94,12 @@ export function Apply() {
     return (
       <main className="min-h-screen bg-[#FAF7F0] text-[#2C40A7] font-sans p-6 flex items-center justify-center">
         <div className="max-w-lg w-full rounded-2xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-8 shadow-[6px_6px_0px_#2C40A7] text-center space-y-6 relative">
-          
+
           <div className="flex justify-center">
             <div className={`size-16 rounded-2xl border-2 border-[#2C40A7] flex items-center justify-center shadow-[3px_3px_0px_#2C40A7] ${
-              isApprovedOrPending ? 'bg-[#F237A1] text-white' : 'bg-[#DC2626] text-white'
+              isApprovedOrPending ? 'bg-[#F237A1] text-white' : 'bg-destructive text-white'
             }`}>
-              {isApprovedOrPending ? <Check className="size-8 stroke-[3]" /> : <CircleAlert className="size-8 stroke-[3]" />}
+              {isApprovedOrPending ? <Check className="size-8 stroke-3" /> : <CircleAlert className="size-8 stroke-3" />}
             </div>
           </div>
 
@@ -145,7 +150,7 @@ export function Apply() {
 
   return (
     <main className="min-h-screen bg-[#FAF7F0] text-[#2C40A7] font-sans selection:bg-[#F237A1] selection:text-white pb-20">
-      
+
       {/* Top Bar Navigation */}
       <header className="border-b-2 border-[#2C40A7] bg-[#FAF7F0] sticky top-0 z-40">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
@@ -164,7 +169,7 @@ export function Apply() {
 
       {/* Main Content Area */}
       <div className="mx-auto max-w-6xl px-6 pt-8 space-y-8">
-        
+
         {/* Step Indicator Bar */}
         <div className="rounded-xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-4 shadow-[3.5px_3.5px_0px_#2C40A7] flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -198,11 +203,11 @@ export function Apply() {
 
         {/* 2-Column Grid (Form + Live EMI Summary Box) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+
           {/* Left Column: Multi-step Form Card */}
           <div className="lg:col-span-7">
             <div className="rounded-2xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-6 sm:p-8 shadow-[5px_5px_0px_#2C40A7]">
-              
+
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit((v) =>
@@ -283,7 +288,9 @@ export function Apply() {
                             <Select value={String(field.value)} onValueChange={(v) => field.onChange(Number(v))}>
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue />
+                                  <SelectValue placeholder="Select rate">
+                                    {RATES.find((r) => r.v === String(field.value))?.l}
+                                  </SelectValue>
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>

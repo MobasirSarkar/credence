@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Mobasher Ali (https://github.com/mobas)
+ * Copyright (c) 2026 ABDUL MOBASIR SARKAR (https://github.com/MobasirSarkar)
  * All Rights Reserved.
  *
  * See LICENSE at the root of this repository.
@@ -15,6 +15,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { ArrowLeft, Loader2, ArrowRight } from 'lucide-react';
+import { RedirectIfLoggedIn } from '@/components/RedirectIfLoggedIn';
+import { BrandLogo } from '@/components/BrandLogo';
 
 export function Signup() {
   const form = useForm<SignupInputT>({
@@ -24,135 +26,136 @@ export function Signup() {
   const signup = useSignup();
 
   return (
-    <main className="min-h-screen bg-[#FAF7F0] text-[#2C40A7] font-sans p-6 flex flex-col items-center justify-center relative selection:bg-[#F237A1] selection:text-white">
-      
-      <div className="w-full max-w-sm">
-        <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-[#2C40A7] hover:text-[#F237A1] transition-colors mb-6">
-          <ArrowLeft className="size-4 stroke-[2.5]" />
-          Back to Home
-        </Link>
+    <>
+      <RedirectIfLoggedIn />
+      <main className="min-h-screen bg-[#FAF7F0] text-[#2C40A7] font-sans p-6 flex flex-col items-center justify-center relative selection:bg-[#F237A1] selection:text-white">
 
-        <div className="rounded-2xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-8 shadow-[6px_6px_0px_#2C40A7] space-y-6">
-          
-          <div className="flex items-center justify-between border-b-2 border-[#2C40A7]/20 pb-4">
-            <div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#2C40A7]/70 block">
-                REGISTRATION
-              </span>
-              <h1 className="text-2xl font-extrabold text-[#2C40A7]">Create account</h1>
-            </div>
-            <span className="flex size-9 items-center justify-center rounded-lg bg-[#F237A1] text-white border-2 border-[#2C40A7] shadow-[2px_2px_0px_#2C40A7] font-extrabold text-sm">
-              LM
-            </span>
-          </div>
+        <div className="w-full max-w-sm">
+          <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-[#2C40A7] hover:text-[#F237A1] transition-colors mb-6">
+            <ArrowLeft className="size-4 stroke-[2.5]" />
+            Back to Home
+          </Link>
 
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit((v) =>
-                signup.mutate(v, { onError: (e) => toast.error((e as Error).message) })
-              )}
-              className="space-y-4"
-            >
-              <FormField
-                control={form.control}
-                name="fullName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-[#2C40A7]">
-                      Full Name
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Alice Applicant" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <div className="rounded-2xl border-2 border-[#2C40A7] bg-[#FFFDF8] p-8 shadow-[6px_6px_0px_#2C40A7] space-y-6">
 
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-[#2C40A7]">
-                      Email Address
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="email" autoComplete="email" placeholder="alice@lms.dev" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-[#2C40A7]">
-                      Password
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="password" autoComplete="new-password" placeholder="••••••••" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="monthlyIncome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-[#2C40A7]">
-                      Monthly Income (₹)
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono font-bold text-[#2C40A7]">₹</span>
-                        <Input
-                          type="number"
-                          className="pl-7 font-mono font-bold"
-                          value={field.value ? field.value / 100 : ''}
-                          onChange={(e) => field.onChange(Math.round(Number(e.target.value) * 100))}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button type="submit" className="w-full mt-2" disabled={signup.isPending}>
-                {signup.isPending ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin" />
-                    Creating account...
-                  </>
-                ) : (
-                  <>
-                    Create Account
-                    <ArrowRight className="size-4" />
-                  </>
-                )}
-              </Button>
-
-              <div className="pt-3 border-t border-[#2C40A7]/20 text-center">
-                <p className="text-xs font-bold text-[#2C40A7]/80">
-                  Already have an account?{' '}
-                  <Link to="/login" className="text-[#F237A1] hover:underline font-extrabold">
-                    Sign in
-                  </Link>
-                </p>
+            <div className="flex items-center justify-between border-b-2 border-[#2C40A7]/20 pb-4">
+              <div>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#2C40A7]/70 block">
+                  REGISTRATION
+                </span>
+                <h1 className="text-2xl font-extrabold text-[#2C40A7]">Create account</h1>
               </div>
+              <BrandLogo size="h-9" />
+            </div>
 
-            </form>
-          </Form>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit((v) =>
+                  signup.mutate(v, { onError: (e) => toast.error((e as Error).message) })
+                )}
+                className="space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-[#2C40A7]">
+                        Full Name
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="Alice Applicant" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-[#2C40A7]">
+                        Email Address
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="email" autoComplete="email" placeholder="alice@lms.dev" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-[#2C40A7]">
+                        Password
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="password" autoComplete="new-password" placeholder="••••••••" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="monthlyIncome"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-mono font-bold uppercase tracking-wider text-[#2C40A7]">
+                        Monthly Income (₹)
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono font-bold text-[#2C40A7]">₹</span>
+                          <Input
+                            type="number"
+                            className="pl-7 font-mono font-bold"
+                            value={field.value ? field.value / 100 : ''}
+                            onChange={(e) => field.onChange(Math.round(Number(e.target.value) * 100))}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button type="submit" className="w-full mt-2" disabled={signup.isPending}>
+                  {signup.isPending ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" />
+                      Creating account...
+                    </>
+                  ) : (
+                    <>
+                      Create Account
+                      <ArrowRight className="size-4" />
+                    </>
+                  )}
+                </Button>
+
+                <div className="pt-3 border-t border-[#2C40A7]/20 text-center">
+                  <p className="text-xs font-bold text-[#2C40A7]/80">
+                    Already have an account?{' '}
+                    <Link to="/login" className="text-[#F237A1] hover:underline font-extrabold">
+                      Sign in
+                    </Link>
+                  </p>
+                </div>
+
+              </form>
+            </Form>
+
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
